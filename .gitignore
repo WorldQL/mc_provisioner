@@ -1,1 +1,7 @@
 /target
+
+/plugins
+/mammoth_server_*
+/bukkit.yml
+/spigot.yml
+/paper.yml
