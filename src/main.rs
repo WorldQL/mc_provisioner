@@ -67,6 +67,13 @@ enum Command {
 
     #[clap(about = "Stop test servers")]
     Stop,
+
+    #[clap(about = "Restart test servers")]
+    Restart {
+        /// Maximum amount of RAM to allocate to each server
+        #[clap(short = 'M', long, default_value = "1G")]
+        max_memory: String,
+    },
 }
 
 fn main() -> Result<()> {
@@ -114,6 +121,13 @@ fn main() -> Result<()> {
         Command::Stop => {
             cmd_start_stop::stop(args.server_count, args.start_port, args.directory_template)?
         }
+
+        Command::Restart { max_memory } => cmd_start_stop::restart(
+            args.server_count,
+            args.start_port,
+            args.directory_template,
+            max_memory,
+        )?,
     }
 
     Ok(())
