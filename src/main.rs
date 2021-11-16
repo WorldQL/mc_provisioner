@@ -4,6 +4,7 @@ use tracing::warn;
 
 mod cmd_init;
 mod cmd_remove;
+mod cmd_start_stop;
 mod utils;
 
 #[derive(Debug, Parser)]
@@ -53,7 +54,11 @@ enum Command {
     Remove,
 
     #[clap(about = "Start test servers")]
-    Start,
+    Start {
+        /// Maximum amount of RAM to allocate to each server
+        #[clap(short = 'M', long, default_value = "1G")]
+        max_memory: String,
+    },
 
     #[clap(about = "Stop test servers")]
     Stop,
@@ -92,12 +97,15 @@ fn main() -> Result<()> {
             cmd_remove::remove(args.server_count, args.start_port, args.directory_template)?
         }
 
-        Command::Start => {
-            todo!()
-        }
+        Command::Start { max_memory } => cmd_start_stop::start(
+            args.server_count,
+            args.start_port,
+            args.directory_template,
+            max_memory,
+        )?,
 
         Command::Stop => {
-            todo!()
+            cmd_start_stop::stop(args.server_count, args.start_port, args.directory_template)?
         }
     }
 
