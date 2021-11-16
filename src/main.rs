@@ -30,8 +30,12 @@ struct Args {
 enum Command {
     #[clap(about = "Initialise and configure test servers")]
     Init {
+        /// Paper version
+        #[clap(short, long, default_value = "1.17.1")]
+        paper_version: String,
+
         /// World seed for all servers
-        #[clap(short, long)]
+        #[clap(short, long = "seed")]
         level_seed: String,
 
         /// Don't copy Plugins directory
@@ -80,6 +84,7 @@ fn main() -> Result<()> {
 
     match args.command {
         Command::Init {
+            paper_version,
             level_seed,
             skip_plugins,
             no_copy_bukkit,
@@ -89,6 +94,7 @@ fn main() -> Result<()> {
             args.server_count,
             args.start_port,
             args.directory_template,
+            paper_version,
             level_seed,
             skip_plugins,
             (no_copy_bukkit, no_copy_spigot, no_copy_paper),

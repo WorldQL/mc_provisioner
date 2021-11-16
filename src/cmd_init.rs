@@ -3,16 +3,19 @@ use std::path::PathBuf;
 
 use color_eyre::Result;
 
-use crate::utils;
+use crate::{paper, utils};
 
 pub fn init(
     server_count: u8,
     start_port: u16,
     directory_template: String,
+    paper_version: String,
     level_seed: String,
     skip_plugins: bool,
     (no_copy_bukkit, no_copy_spigot, no_copy_paper): (bool, bool, bool),
 ) -> Result<()> {
+    let paper_jar = paper::download_paper(&paper_version)?;
+
     let plugins_dir = PathBuf::from("plugins");
     let bukkit_yml = PathBuf::from("bukkit.yml");
     let spigot_yml = PathBuf::from("spigot.yml");
@@ -29,6 +32,7 @@ pub fn init(
             fs::create_dir(&directory)?;
         }
 
+        fs::write(directory.join("paper.jar"), &paper_jar)?;
         fs::write(directory.join("eula.txt"), "eula=true\n")?;
         fs::write(
             directory.join("server.properties"),
