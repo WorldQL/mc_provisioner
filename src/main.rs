@@ -4,24 +4,30 @@ use color_eyre::Result;
 mod cmd_init;
 
 #[derive(Debug, Parser)]
-enum Args {
-    // Initialise test servers
+struct Args {
+    /// Number of servers to initialise
+    #[clap(short = 'c', long, default_value = "2")]
+    server_count: u8,
+
+    /// Server port to start counting at
+    #[clap(short = 'p', long, default_value = "25565")]
+    start_port: u16,
+
+    /// MOTD Template, prepends server index
+    #[clap(short, long, default_value = "Mammoth Server")]
+    motd_template: String,
+
+    #[clap(subcommand)]
+    command: Command,
+}
+
+#[derive(Debug, Parser)]
+enum Command {
+    #[clap(about = "Initialise and configure test servers")]
     Init {
-        /// Number of servers to initialise
-        #[clap(short = 'c', long, default_value = "2")]
-        server_count: u8,
-
-        /// Server port to start counting at
-        #[clap(short = 'p', long, default_value = "25565")]
-        start_port: u16,
-
         /// World seed for all servers
         #[clap(short, long)]
         level_seed: String,
-
-        /// MOTD Template, prepends server index
-        #[clap(short, long, default_value = "Mammoth Server")]
-        motd_template: String,
 
         /// Don't copy Plugins directory
         #[clap(short, long)]
@@ -39,6 +45,15 @@ enum Args {
         #[clap(long)]
         no_copy_paper: bool,
     },
+
+    #[clap(about = "Remove test servers")]
+    Remove,
+
+    #[clap(about = "Start test servers")]
+    Start,
+
+    #[clap(about = "Stop test servers")]
+    Stop,
 }
 
 fn main() -> Result<()> {
@@ -49,24 +64,33 @@ fn main() -> Result<()> {
         .init();
 
     let args = Args::parse();
-    match args {
-        Args::Init {
-            server_count,
-            start_port,
+    match args.command {
+        Command::Init {
             level_seed,
-            motd_template,
             skip_plugins,
             no_copy_bukkit,
             no_copy_spigot,
             no_copy_paper,
         } => cmd_init::init(
-            server_count,
-            start_port,
+            args.server_count,
+            args.start_port,
+            args.motd_template,
             level_seed,
-            motd_template,
             skip_plugins,
             (no_copy_bukkit, no_copy_spigot, no_copy_paper),
         )?,
+
+        Command::Remove => {
+            todo!()
+        }
+
+        Command::Start => {
+            todo!()
+        }
+
+        Command::Stop => {
+            todo!()
+        }
     }
 
     Ok(())

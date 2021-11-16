@@ -7,8 +7,8 @@ use tracing::warn;
 pub fn init(
     server_count: u8,
     start_port: u16,
-    level_seed: String,
     motd_template: String,
+    level_seed: String,
     skip_plugins: bool,
     (no_copy_bukkit, no_copy_spigot, no_copy_paper): (bool, bool, bool),
 ) -> Result<()> {
