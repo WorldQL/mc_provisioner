@@ -10,9 +10,7 @@ pub fn init(
     level_seed: String,
     motd_template: String,
     skip_plugins: bool,
-    no_copy_bukkit: bool,
-    no_copy_spigot: bool,
-    no_copy_paper: bool,
+    (no_copy_bukkit, no_copy_spigot, no_copy_paper): (bool, bool, bool),
 ) -> Result<()> {
     if server_count == 0 {
         warn!("no servers were provisioned as --server-count was set to 0");

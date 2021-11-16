@@ -65,9 +65,7 @@ fn main() -> Result<()> {
             level_seed,
             motd_template,
             skip_plugins,
-            no_copy_bukkit,
-            no_copy_spigot,
-            no_copy_paper,
+            (no_copy_bukkit, no_copy_spigot, no_copy_paper),
         )?,
     }
 
