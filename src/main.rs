@@ -3,6 +3,7 @@ use color_eyre::Result;
 use tracing::warn;
 
 mod cmd_init;
+mod cmd_remove;
 mod utils;
 
 #[derive(Debug, Parser)]
@@ -88,7 +89,7 @@ fn main() -> Result<()> {
         )?,
 
         Command::Remove => {
-            todo!()
+            cmd_remove::remove(args.server_count, args.start_port, args.directory_template)?
         }
 
         Command::Start => {
