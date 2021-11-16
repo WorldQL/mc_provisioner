@@ -42,6 +42,7 @@ enum Args {
 }
 
 fn main() -> Result<()> {
+    color_eyre::install()?;
     tracing_subscriber::fmt()
         .with_target(false)
         .with_env_filter(format!("{}=trace", env!("CARGO_PKG_NAME")))
