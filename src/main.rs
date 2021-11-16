@@ -5,6 +5,7 @@ use tracing::warn;
 mod cmd_init;
 mod cmd_remove;
 mod cmd_start_stop;
+mod cmd_sync_plugins;
 mod paper;
 mod utils;
 
@@ -54,6 +55,9 @@ enum Command {
         #[clap(long)]
         no_copy_paper: bool,
     },
+
+    #[clap(about = "Sync plugins to all test servers")]
+    SyncPlugins,
 
     #[clap(about = "Remove test servers")]
     Remove,
@@ -105,6 +109,12 @@ fn main() -> Result<()> {
             level_seed,
             skip_plugins,
             (no_copy_bukkit, no_copy_spigot, no_copy_paper),
+        )?,
+
+        Command::SyncPlugins => cmd_sync_plugins::sync_plugins(
+            args.server_count,
+            args.start_port,
+            args.directory_template,
         )?,
 
         Command::Remove => {
