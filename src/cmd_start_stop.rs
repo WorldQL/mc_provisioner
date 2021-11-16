@@ -1,5 +1,5 @@
-use color_eyre::Result;
 use cmd_lib::run_cmd;
+use color_eyre::Result;
 use tracing::info;
 
 use crate::utils;
