@@ -38,6 +38,11 @@ enum Args {
 }
 
 fn main() -> Result<()> {
+    tracing_subscriber::fmt()
+        .with_target(false)
+        .with_env_filter(format!("{}=trace", env!("CARGO_PKG_NAME")))
+        .init();
+
     let args = Args::parse();
     match args {
         Args::Init {
