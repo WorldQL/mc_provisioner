@@ -5,6 +5,7 @@ use tracing::warn;
 mod cmd_init;
 mod cmd_remove;
 mod cmd_start_stop;
+mod paper;
 mod utils;
 
 #[derive(Debug, Parser)]
