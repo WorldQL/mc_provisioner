@@ -5,6 +5,7 @@ use color_eyre::Result;
 use once_cell::sync::Lazy;
 use reqwest::blocking::{Client, ClientBuilder};
 use serde::Deserialize;
+use tracing::info;
 
 static APP_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
 static CLIENT: Lazy<Client> = Lazy::new(|| {
@@ -70,6 +71,8 @@ pub fn download_paper(version: &str) -> Result<Bytes> {
     let build_id = latest_paper_build(version)?;
     let download_url = paper_url(version, build_id)?;
 
+    info!("downloading paper.jar build {} for {}", build_id, version);
     let bytes = CLIENT.get(download_url).send()?.bytes()?;
+
     Ok(bytes)
 }

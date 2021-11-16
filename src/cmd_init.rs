@@ -2,6 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use color_eyre::Result;
+use tracing::info;
 
 use crate::{paper, utils};
 
@@ -28,6 +29,7 @@ pub fn init(
 
     let server_iter = utils::server_iter(server_count, start_port, &directory_template);
     for (_, port, directory, motd) in server_iter {
+        info!("creating server: {:?}", &directory);
         if !directory.exists() {
             fs::create_dir(&directory)?;
         }
