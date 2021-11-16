@@ -2,21 +2,17 @@ use std::fs;
 use std::path::PathBuf;
 
 use color_eyre::Result;
-use tracing::warn;
+
+use crate::utils;
 
 pub fn init(
     server_count: u8,
     start_port: u16,
-    motd_template: String,
+    directory_template: String,
     level_seed: String,
     skip_plugins: bool,
     (no_copy_bukkit, no_copy_spigot, no_copy_paper): (bool, bool, bool),
 ) -> Result<()> {
-    if server_count == 0 {
-        warn!("no servers were provisioned as --server-count was set to 0");
-        return Ok(());
-    }
-
     let plugins_dir = PathBuf::from("plugins");
     let bukkit_yml = PathBuf::from("bukkit.yml");
     let spigot_yml = PathBuf::from("spigot.yml");
@@ -27,13 +23,8 @@ pub fn init(
     let spigot_exists = spigot_yml.as_path().exists();
     let paper_exists = paper_yml.as_path().exists();
 
-    for idx in 1..=server_count {
-        let port = start_port + (idx as u16 - 1);
-        let motd = format!("{} {}", &motd_template, idx);
-
-        let directory = motd.clone().to_lowercase().replace(' ', "_");
-        let directory = PathBuf::from(directory);
-
+    let server_iter = utils::server_iter(server_count, start_port, &directory_template);
+    for (_, port, directory, motd) in server_iter {
         if !directory.exists() {
             fs::create_dir(&directory)?;
         }

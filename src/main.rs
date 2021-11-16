@@ -1,7 +1,9 @@
 use clap::Parser;
 use color_eyre::Result;
+use tracing::warn;
 
 mod cmd_init;
+mod utils;
 
 #[derive(Debug, Parser)]
 struct Args {
@@ -13,9 +15,9 @@ struct Args {
     #[clap(short = 'p', long, default_value = "25565")]
     start_port: u16,
 
-    /// MOTD Template, prepends server index
+    /// Directory template, appends server port
     #[clap(short, long, default_value = "Mammoth Server")]
-    motd_template: String,
+    directory_template: String,
 
     #[clap(subcommand)]
     command: Command,
@@ -64,6 +66,11 @@ fn main() -> Result<()> {
         .init();
 
     let args = Args::parse();
+    if args.server_count == 0 {
+        warn!("no action taken as --server-count was set to 0");
+        return Ok(());
+    }
+
     match args.command {
         Command::Init {
             level_seed,
@@ -74,7 +81,7 @@ fn main() -> Result<()> {
         } => cmd_init::init(
             args.server_count,
             args.start_port,
-            args.motd_template,
+            args.directory_template,
             level_seed,
             skip_plugins,
             (no_copy_bukkit, no_copy_spigot, no_copy_paper),
