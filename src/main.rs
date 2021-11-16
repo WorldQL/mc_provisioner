@@ -1,6 +1,8 @@
 use clap::Parser;
 use color_eyre::Result;
 
+mod cmd_init;
+
 #[derive(Debug, Parser)]
 enum Args {
     // Initialise test servers
@@ -32,12 +34,30 @@ enum Args {
         /// Don't copy paper.yml
         #[clap(long)]
         no_copy_paper: bool,
-    }
+    },
 }
 
 fn main() -> Result<()> {
     let args = Args::parse();
-    dbg!(&args);
+    match args {
+        Args::Init {
+            start_port,
+            level_seed,
+            motd_template,
+            skip_plugins,
+            no_copy_bukkit,
+            no_copy_spigot,
+            no_copy_paper,
+        } => cmd_init::init(
+            start_port,
+            level_seed,
+            motd_template,
+            skip_plugins,
+            no_copy_bukkit,
+            no_copy_spigot,
+            no_copy_paper,
+        )?,
+    }
 
     Ok(())
 }
