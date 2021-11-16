@@ -7,6 +7,10 @@ mod cmd_init;
 enum Args {
     // Initialise test servers
     Init {
+        /// Number of servers to initialise
+        #[clap(short = 'c', long, default_value = "2")]
+        server_count: u8,
+
         /// Server port to start counting at
         #[clap(short = 'p', long, default_value = "25565")]
         start_port: u16,
@@ -46,6 +50,7 @@ fn main() -> Result<()> {
     let args = Args::parse();
     match args {
         Args::Init {
+            server_count,
             start_port,
             level_seed,
             motd_template,
@@ -54,6 +59,7 @@ fn main() -> Result<()> {
             no_copy_spigot,
             no_copy_paper,
         } => cmd_init::init(
+            server_count,
             start_port,
             level_seed,
             motd_template,
