@@ -1,5 +1,6 @@
 /target
 
+/provisioner.toml
 /plugins
 /mammoth_server_*
 /bukkit.yml

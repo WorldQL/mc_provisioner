@@ -7,6 +7,7 @@ mod cmd_init;
 mod cmd_remove;
 mod cmd_start_stop;
 mod cmd_sync_plugins;
+mod config;
 mod paper;
 mod utils;
 
