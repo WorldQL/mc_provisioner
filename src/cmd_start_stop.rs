@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use cmd_lib::run_cmd;
 use color_eyre::Result;
-use tracing::info;
+use tracing::{error, info};
 
 use crate::config::{GlobalArgs, StartArgs};
 use crate::utils;
@@ -18,13 +18,23 @@ pub fn start(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
     for (_, _, directory, _) in server_iter {
         let name = directory.to_str().unwrap();
         info!("starting tmux session: {}", &name);
-        run_cmd!(tmux new -d  -s $name)?;
+
+        if run_cmd!(tmux new -d  -s $name).is_err() {
+            error!("failed to start \"{}\"", &name);
+            continue;
+        }
 
         let cd = format!("cd ./{}", &name);
-        run_cmd!(tmux send -t $name $cd ENTER)?;
+        if run_cmd!(tmux send -t $name $cd ENTER).is_err() {
+            error!("failed to start \"{}\"", &name);
+            continue;
+        }
 
         let run = format!("java -Xmx{} -jar paper.jar nogui", &args.max_memory);
-        run_cmd!(tmux send -t $name $run ENTER)?;
+        if run_cmd!(tmux send -t $name $run ENTER).is_err() {
+            error!("failed to start \"{}\"", &name);
+            continue;
+        }
     }
 
     Ok(())
@@ -41,7 +51,10 @@ pub fn stop(global_args: GlobalArgs) -> Result<()> {
         let name = directory.to_str().unwrap();
 
         info!("killing tmux session: {}", &name);
-        run_cmd!(tmux kill-session -t $name)?;
+        if run_cmd!(tmux kill-session -t $name).is_err() {
+            error!("failed to stop \"{}\"", &name);
+            continue;
+        }
     }
 
     Ok(())
@@ -56,15 +69,21 @@ pub fn restart(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
 
     for (_, _, directory, _) in server_iter {
         let name = directory.to_str().unwrap();
-
         info!("restarting tmux session: {}", &name);
-        run_cmd!(tmux send -t $name C-c)?;
+
+        if run_cmd!(tmux send -t $name C-c).is_err() {
+            error!("failed to restart \"{}\"", &name);
+            continue;
+        }
 
         // Wait for server to shutdown
         thread::sleep(Duration::from_millis(200));
 
         let run = format!("java -Xmx{} -jar paper.jar nogui", &args.max_memory);
-        run_cmd!(tmux send -t $name $run ENTER)?;
+        if run_cmd!(tmux send -t $name $run ENTER).is_err() {
+            error!("failed to restart \"{}\"", &name);
+            continue;
+        }
     }
 
     Ok(())
