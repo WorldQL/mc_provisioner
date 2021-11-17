@@ -42,6 +42,24 @@ enum Command {
         #[clap(short, long = "seed")]
         level_seed: Option<String>,
 
+        /// Server Operators
+        #[clap(
+            short = 'o',
+            long,
+            multiple_occurrences = true,
+            multiple_values = false
+        )]
+        ops: Vec<String>,
+
+        /// Server Operators
+        #[clap(
+            short = 'w',
+            long,
+            multiple_occurrences = true,
+            multiple_values = false
+        )]
+        white_list: Vec<String>,
+
         /// Don't copy Plugins directory
         #[clap(short, long)]
         skip_plugins: Option<bool>,
@@ -112,6 +130,8 @@ fn main() -> Result<()> {
         Command::Init {
             paper_version,
             level_seed,
+            ops,
+            white_list,
             skip_plugins,
             no_copy_bukkit,
             no_copy_spigot,
@@ -122,6 +142,8 @@ fn main() -> Result<()> {
                 config.init.unwrap_or_default(),
                 paper_version,
                 level_seed,
+                ops,
+                white_list,
                 skip_plugins,
                 no_copy_bukkit,
                 no_copy_spigot,

@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::path::PathBuf;
 
 use color_eyre::Result;
@@ -26,6 +26,8 @@ pub struct GlobalConfig {
 pub struct InitConfig {
     paper_version: Option<String>,
     level_seed: Option<String>,
+    ops: Option<Vec<String>>,
+    white_list: Option<Vec<String>>,
     skip_plugins: Option<bool>,
     no_copy_bukkit: Option<bool>,
     no_copy_spigot: Option<bool>,
@@ -74,6 +76,8 @@ pub fn global_args(config: GlobalConfig, args: Args) -> GlobalArgs {
 pub struct InitArgs {
     pub paper_version: String,
     pub level_seed: String,
+    pub ops: HashSet<String>,
+    pub white_list: HashSet<String>,
     pub skip_plugins: bool,
     pub no_copy_bukkit: bool,
     pub no_copy_spigot: bool,
@@ -86,6 +90,8 @@ pub fn init_args(
     config: InitConfig,
     paper_version: Option<String>,
     level_seed: Option<String>,
+    mut ops: Vec<String>,
+    mut white_list: Vec<String>,
     skip_plugins: Option<bool>,
     no_copy_bukkit: Option<bool>,
     no_copy_spigot: Option<bool>,
@@ -108,11 +114,27 @@ pub fn init_args(
         config_props
     };
 
+    let ops = {
+        let mut config_ops = config.ops.unwrap_or_default();
+        config_ops.append(&mut ops);
+
+        HashSet::from_iter(config_ops.into_iter())
+    };
+
+    let white_list = {
+        let mut config_white_list = config.white_list.unwrap_or_default();
+        config_white_list.append(&mut white_list);
+
+        HashSet::from_iter(config_white_list.into_iter())
+    };
+
     InitArgs {
         paper_version: paper_version
             .or(config.paper_version)
             .unwrap_or_else(|| "1.17.1".into()),
         level_seed: level_seed.or(config.level_seed).unwrap_or_default(),
+        ops,
+        white_list,
         skip_plugins: skip_plugins.or(config.skip_plugins).unwrap_or_default(),
         no_copy_bukkit: no_copy_bukkit.or(config.no_copy_bukkit).unwrap_or_default(),
         no_copy_spigot: no_copy_spigot.or(config.no_copy_spigot).unwrap_or_default(),
