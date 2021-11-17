@@ -52,6 +52,7 @@ impl FromStr for ServerProperty {
             "query.port",
             "server-port",
             "white-list",
+            "level-name",
         ];
 
         let lower = first.to_lowercase();

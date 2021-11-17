@@ -5,6 +5,7 @@ use utils::ServerProperty;
 
 mod cmd_init;
 mod cmd_remove;
+mod cmd_reset_world;
 mod cmd_start_stop;
 mod cmd_sync_plugins;
 mod config;
@@ -89,6 +90,9 @@ enum Command {
     #[clap(about = "Sync plugins to all test servers")]
     SyncPlugins,
 
+    #[clap(about = "Resets each server's world")]
+    ResetWorld,
+
     #[clap(about = "Remove test servers")]
     Remove,
 
@@ -166,6 +170,8 @@ fn main() -> Result<()> {
         }
 
         Command::SyncPlugins => cmd_sync_plugins::sync_plugins(global_args)?,
+
+        Command::ResetWorld => cmd_reset_world::reset_world(global_args)?,
 
         Command::Remove => cmd_remove::remove(global_args)?,
 
