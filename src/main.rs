@@ -149,7 +149,7 @@ fn main() -> Result<()> {
                 no_copy_spigot,
                 no_copy_paper,
                 server_properties,
-            );
+            )?;
 
             if init_args.level_seed.is_empty() {
                 error!("--seed must be set else all servers will have different seeds");

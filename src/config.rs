@@ -97,7 +97,7 @@ pub fn init_args(
     no_copy_spigot: Option<bool>,
     no_copy_paper: Option<bool>,
     server_properties: Vec<ServerProperty>,
-) -> InitArgs {
+) -> Result<InitArgs> {
     let server_properties = {
         let mut arg_props = utils::properties_to_map(server_properties);
         let mut config_props = config
@@ -128,7 +128,7 @@ pub fn init_args(
         HashSet::from_iter(config_white_list.into_iter())
     };
 
-    InitArgs {
+    let args = InitArgs {
         paper_version: paper_version
             .or(config.paper_version)
             .unwrap_or_else(|| "1.17.1".into()),
@@ -139,8 +139,10 @@ pub fn init_args(
         no_copy_bukkit: no_copy_bukkit.or(config.no_copy_bukkit).unwrap_or_default(),
         no_copy_spigot: no_copy_spigot.or(config.no_copy_spigot).unwrap_or_default(),
         no_copy_paper: no_copy_paper.or(config.no_copy_paper).unwrap_or_default(),
-        server_properties: utils::map_to_properties(server_properties),
-    }
+        server_properties: utils::map_to_properties(server_properties)?,
+    };
+
+    Ok(args)
 }
 
 #[derive(Debug)]

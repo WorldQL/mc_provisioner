@@ -3,6 +3,7 @@ use std::fmt::Display;
 use std::path::PathBuf;
 use std::str::FromStr;
 
+use color_eyre::Result;
 use thiserror::Error;
 
 type ServerInfo = (u8, u16, PathBuf, String);
@@ -65,10 +66,14 @@ pub enum ServerPropertyError {
     DisallowedProperty(String),
 }
 
-pub fn map_to_properties(map: BTreeMap<String, String>) -> Vec<ServerProperty> {
-    map.into_iter()
-        .map(|(key, value)| ServerProperty(key.to_lowercase(), value))
-        .collect::<Vec<_>>()
+pub fn map_to_properties(map: BTreeMap<String, String>) -> Result<Vec<ServerProperty>> {
+    let mut vec = Vec::with_capacity(map.len());
+    for (key, value) in map.into_iter() {
+        let prop = format!("{}={}", key, value).parse::<ServerProperty>()?;
+        vec.push(prop);
+    }
+
+    Ok(vec)
 }
 
 pub fn properties_to_map(vec: Vec<ServerProperty>) -> BTreeMap<String, String> {
