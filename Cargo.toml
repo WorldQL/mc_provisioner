@@ -2,6 +2,7 @@
 name = "provisioner"
 version = "0.1.0"
 edition = "2021"
+description = "Provision Minecraft servers with ease using Paper and tmux"
 
 [dependencies]
 bytes = "1.1.0"

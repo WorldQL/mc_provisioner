@@ -10,6 +10,7 @@ mod paper;
 mod utils;
 
 #[derive(Debug, Parser)]
+#[clap(about, version)]
 struct Args {
     /// Number of servers to initialise
     #[clap(short = 'c', long, default_value = "2")]
