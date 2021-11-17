@@ -1,6 +1,7 @@
 use clap::Parser;
 use color_eyre::Result;
 use tracing::warn;
+use utils::ServerProperty;
 
 mod cmd_init;
 mod cmd_remove;
@@ -33,7 +34,7 @@ enum Command {
     #[clap(about = "Initialise and configure test servers")]
     Init {
         /// Paper version
-        #[clap(short, long, default_value = "1.17.1")]
+        #[clap(short = 'P', long, default_value = "1.17.1")]
         paper_version: String,
 
         /// World seed for all servers
@@ -55,6 +56,15 @@ enum Command {
         /// Don't copy paper.yml
         #[clap(long)]
         no_copy_paper: bool,
+
+        /// Additional server properties
+        #[clap(
+            short = 'p',
+            long,
+            multiple_occurrences = true,
+            multiple_values = false
+        )]
+        server_properties: Vec<ServerProperty>,
     },
 
     #[clap(about = "Sync plugins to all test servers")]
@@ -102,14 +112,15 @@ fn main() -> Result<()> {
             no_copy_bukkit,
             no_copy_spigot,
             no_copy_paper,
+            server_properties,
         } => cmd_init::init(
             args.server_count,
             args.start_port,
             args.directory_template,
             paper_version,
             level_seed,
-            skip_plugins,
-            (no_copy_bukkit, no_copy_spigot, no_copy_paper),
+            (skip_plugins, no_copy_bukkit, no_copy_spigot, no_copy_paper),
+            server_properties,
         )?,
 
         Command::SyncPlugins => cmd_sync_plugins::sync_plugins(

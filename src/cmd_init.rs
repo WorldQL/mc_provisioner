@@ -4,7 +4,8 @@ use std::path::PathBuf;
 use color_eyre::Result;
 use tracing::info;
 
-use crate::{paper, utils};
+use crate::paper;
+use crate::utils::{self, ServerProperty};
 
 pub fn init(
     server_count: u8,
@@ -12,8 +13,8 @@ pub fn init(
     directory_template: String,
     paper_version: String,
     level_seed: String,
-    skip_plugins: bool,
-    (no_copy_bukkit, no_copy_spigot, no_copy_paper): (bool, bool, bool),
+    (skip_plugins, no_copy_bukkit, no_copy_spigot, no_copy_paper): (bool, bool, bool, bool),
+    server_properties: Vec<ServerProperty>,
 ) -> Result<()> {
     let paper_jar = paper::download_paper(&paper_version)?;
 
@@ -27,6 +28,11 @@ pub fn init(
     let spigot_exists = spigot_yml.as_path().exists();
     let paper_exists = paper_yml.as_path().exists();
 
+    let extra_props = server_properties
+        .into_iter()
+        .map(|p| format!("{}\n", p))
+        .collect::<String>();
+
     let server_iter = utils::server_iter(server_count, start_port, &directory_template);
     for (_, port, directory, motd) in server_iter {
         info!("creating server: {:?}", &directory);
@@ -36,13 +42,13 @@ pub fn init(
 
         fs::write(directory.join("paper.jar"), &paper_jar)?;
         fs::write(directory.join("eula.txt"), "eula=true\n")?;
-        fs::write(
-            directory.join("server.properties"),
-            format!(
-                "level-seed={}\nmotd={}\nquery.port={}\nserver-port={}\n",
-                &level_seed, motd, port, port
-            ),
-        )?;
+
+        let properties = format!(
+            "level-seed={}\nmotd={}\nquery.port={}\nserver-port={}\n{}",
+            &level_seed, motd, port, port, &extra_props
+        );
+
+        fs::write(directory.join("server.properties"), properties)?;
 
         if !skip_plugins && plugins_exists {
             copy_dir::copy_dir(&plugins_dir, directory.join(&plugins_dir))?;
