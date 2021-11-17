@@ -5,15 +5,16 @@ use cmd_lib::run_cmd;
 use color_eyre::Result;
 use tracing::info;
 
+use crate::config::{GlobalArgs, StartArgs};
 use crate::utils;
 
-pub fn start(
-    server_count: u8,
-    start_port: u16,
-    directory_template: String,
-    max_memory: String,
-) -> Result<()> {
-    let server_iter = utils::server_iter(server_count, start_port, &directory_template);
+pub fn start(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
+    let server_iter = utils::server_iter(
+        global_args.server_count,
+        global_args.start_port,
+        &global_args.directory_template,
+    );
+
     for (_, _, directory, _) in server_iter {
         let name = directory.to_str().unwrap();
         info!("starting tmux session: {}", &name);
@@ -22,15 +23,20 @@ pub fn start(
         let cd = format!("cd ./{}", &name);
         run_cmd!(tmux send -t $name $cd ENTER)?;
 
-        let run = format!("java -Xmx{} -jar paper.jar nogui", max_memory);
+        let run = format!("java -Xmx{} -jar paper.jar nogui", &args.max_memory);
         run_cmd!(tmux send -t $name $run ENTER)?;
     }
 
     Ok(())
 }
 
-pub fn stop(server_count: u8, start_port: u16, directory_template: String) -> Result<()> {
-    let server_iter = utils::server_iter(server_count, start_port, &directory_template);
+pub fn stop(global_args: GlobalArgs) -> Result<()> {
+    let server_iter = utils::server_iter(
+        global_args.server_count,
+        global_args.start_port,
+        &global_args.directory_template,
+    );
+
     for (_, _, directory, _) in server_iter {
         let name = directory.to_str().unwrap();
 
@@ -41,13 +47,13 @@ pub fn stop(server_count: u8, start_port: u16, directory_template: String) -> Re
     Ok(())
 }
 
-pub fn restart(
-    server_count: u8,
-    start_port: u16,
-    directory_template: String,
-    max_memory: String,
-) -> Result<()> {
-    let server_iter = utils::server_iter(server_count, start_port, &directory_template);
+pub fn restart(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
+    let server_iter = utils::server_iter(
+        global_args.server_count,
+        global_args.start_port,
+        &global_args.directory_template,
+    );
+
     for (_, _, directory, _) in server_iter {
         let name = directory.to_str().unwrap();
 
@@ -57,7 +63,7 @@ pub fn restart(
         // Wait for server to shutdown
         thread::sleep(Duration::from_millis(200));
 
-        let run = format!("java -Xmx{} -jar paper.jar nogui", max_memory);
+        let run = format!("java -Xmx{} -jar paper.jar nogui", &args.max_memory);
         run_cmd!(tmux send -t $name $run ENTER)?;
     }
 

@@ -4,19 +4,12 @@ use std::path::PathBuf;
 use color_eyre::Result;
 use tracing::info;
 
+use crate::config::{GlobalArgs, InitArgs};
 use crate::paper;
-use crate::utils::{self, ServerProperty};
+use crate::utils::{self};
 
-pub fn init(
-    server_count: u8,
-    start_port: u16,
-    directory_template: String,
-    paper_version: String,
-    level_seed: String,
-    (skip_plugins, no_copy_bukkit, no_copy_spigot, no_copy_paper): (bool, bool, bool, bool),
-    server_properties: Vec<ServerProperty>,
-) -> Result<()> {
-    let paper_jar = paper::download_paper(&paper_version)?;
+pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
+    let paper_jar = paper::download_paper(&args.paper_version)?;
 
     let plugins_dir = PathBuf::from("plugins");
     let bukkit_yml = PathBuf::from("bukkit.yml");
@@ -28,12 +21,18 @@ pub fn init(
     let spigot_exists = spigot_yml.as_path().exists();
     let paper_exists = paper_yml.as_path().exists();
 
-    let extra_props = server_properties
+    let extra_props = args
+        .server_properties
         .into_iter()
         .map(|p| format!("{}\n", p))
         .collect::<String>();
 
-    let server_iter = utils::server_iter(server_count, start_port, &directory_template);
+    let server_iter = utils::server_iter(
+        global_args.server_count,
+        global_args.start_port,
+        &global_args.directory_template,
+    );
+
     for (_, port, directory, motd) in server_iter {
         info!("creating server: {:?}", &directory);
         if !directory.exists() {
@@ -45,24 +44,24 @@ pub fn init(
 
         let properties = format!(
             "level-seed={}\nmotd={}\nquery.port={}\nserver-port={}\n{}",
-            &level_seed, motd, port, port, &extra_props
+            &args.level_seed, motd, port, port, &extra_props
         );
 
         fs::write(directory.join("server.properties"), properties)?;
 
-        if !skip_plugins && plugins_exists {
+        if !args.skip_plugins && plugins_exists {
             copy_dir::copy_dir(&plugins_dir, directory.join(&plugins_dir))?;
         }
 
-        if !no_copy_bukkit && bukkit_exists {
+        if !args.no_copy_bukkit && bukkit_exists {
             fs::copy(&bukkit_yml, directory.join(&bukkit_yml))?;
         }
 
-        if !no_copy_spigot && spigot_exists {
+        if !args.no_copy_spigot && spigot_exists {
             fs::copy(&spigot_yml, directory.join(&spigot_yml))?;
         }
 
-        if !no_copy_paper && paper_exists {
+        if !args.no_copy_paper && paper_exists {
             fs::copy(&paper_yml, directory.join(&paper_yml))?;
         }
     }

@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::fmt::Display;
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -23,7 +24,7 @@ pub fn server_iter(
     })
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ServerProperty(String, String);
 
 impl Display for ServerProperty {
@@ -62,4 +63,16 @@ pub enum ServerPropertyError {
 
     #[error("disallowed property: {0}")]
     DisallowedProperty(String),
+}
+
+pub fn map_to_properties(map: BTreeMap<String, String>) -> Vec<ServerProperty> {
+    map.into_iter()
+        .map(|(key, value)| ServerProperty(key.to_lowercase(), value))
+        .collect::<Vec<_>>()
+}
+
+pub fn properties_to_map(vec: Vec<ServerProperty>) -> BTreeMap<String, String> {
+    vec.into_iter()
+        .map(|p| (p.0, p.1))
+        .collect::<BTreeMap<_, _>>()
 }

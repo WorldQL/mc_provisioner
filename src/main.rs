@@ -1,6 +1,6 @@
 use clap::Parser;
 use color_eyre::Result;
-use tracing::warn;
+use tracing::{error, warn};
 use utils::ServerProperty;
 
 mod cmd_init;
@@ -11,52 +11,52 @@ mod config;
 mod paper;
 mod utils;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, Parser)]
 #[clap(about, version)]
-struct Args {
-    /// Number of servers to initialise
-    #[clap(short = 'c', long, default_value = "2")]
-    server_count: u8,
+pub struct Args {
+    /// Number of servers to initialise [default: 2]
+    #[clap(short = 'c', long)]
+    server_count: Option<u8>,
 
-    /// Server port to start counting at
-    #[clap(short = 'p', long, default_value = "25565")]
-    start_port: u16,
+    /// Server port to start counting at [default: 25565]
+    #[clap(short = 'p', long)]
+    start_port: Option<u16>,
 
-    /// Directory template, appends server port
-    #[clap(short, long, default_value = "Mammoth Server")]
-    directory_template: String,
+    /// Directory template, appends server port [default: "Mammoth Server"]
+    #[clap(short, long)]
+    directory_template: Option<String>,
 
     #[clap(subcommand)]
     command: Command,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, Parser)]
 enum Command {
     #[clap(about = "Initialise and configure test servers")]
     Init {
-        /// Paper version
-        #[clap(short = 'P', long, default_value = "1.17.1")]
-        paper_version: String,
+        /// Paper version [default: "1.17.1"]
+        #[clap(short = 'P', long)]
+        paper_version: Option<String>,
 
         /// World seed for all servers
         #[clap(short, long = "seed")]
-        level_seed: String,
+        level_seed: Option<String>,
 
         /// Don't copy Plugins directory
         #[clap(short, long)]
-        skip_plugins: bool,
+        skip_plugins: Option<bool>,
 
         /// Don't copy bukkit.yml
         #[clap(long)]
-        no_copy_bukkit: bool,
+        no_copy_bukkit: Option<bool>,
 
         /// Don't copy spigot.yml
         #[clap(long)]
-        no_copy_spigot: bool,
+        no_copy_spigot: Option<bool>,
 
         /// Don't copy paper.yml
         #[clap(long)]
-        no_copy_paper: bool,
+        no_copy_paper: Option<bool>,
 
         /// Additional server properties
         #[clap(
@@ -76,9 +76,9 @@ enum Command {
 
     #[clap(about = "Start test servers")]
     Start {
-        /// Maximum amount of RAM to allocate to each server
-        #[clap(short = 'M', long, default_value = "1G")]
-        max_memory: String,
+        /// Maximum amount of RAM to allocate to each server [default: "1G"]
+        #[clap(short = 'M', long)]
+        max_memory: Option<String>,
     },
 
     #[clap(about = "Stop test servers")]
@@ -86,9 +86,9 @@ enum Command {
 
     #[clap(about = "Restart test servers")]
     Restart {
-        /// Maximum amount of RAM to allocate to each server
-        #[clap(short = 'M', long, default_value = "1G")]
-        max_memory: String,
+        /// Maximum amount of RAM to allocate to each server [default: "1G"]
+        #[clap(short = 'M', long)]
+        max_memory: Option<String>,
     },
 }
 
@@ -99,8 +99,11 @@ fn main() -> Result<()> {
         .with_env_filter(format!("{}=trace", env!("CARGO_PKG_NAME")))
         .init();
 
+    let config = config::read_config()?;
     let args = Args::parse();
-    if args.server_count == 0 {
+    let global_args = config::global_args(config.global.unwrap_or_default(), args.clone());
+
+    if global_args.server_count == 0 {
         warn!("no action taken as --server-count was set to 0");
         return Ok(());
     }
@@ -114,43 +117,41 @@ fn main() -> Result<()> {
             no_copy_spigot,
             no_copy_paper,
             server_properties,
-        } => cmd_init::init(
-            args.server_count,
-            args.start_port,
-            args.directory_template,
-            paper_version,
-            level_seed,
-            (skip_plugins, no_copy_bukkit, no_copy_spigot, no_copy_paper),
-            server_properties,
-        )?,
+        } => {
+            let init_args = config::init_args(
+                config.init.unwrap_or_default(),
+                paper_version,
+                level_seed,
+                skip_plugins,
+                no_copy_bukkit,
+                no_copy_spigot,
+                no_copy_paper,
+                server_properties,
+            );
 
-        Command::SyncPlugins => cmd_sync_plugins::sync_plugins(
-            args.server_count,
-            args.start_port,
-            args.directory_template,
-        )?,
+            if init_args.level_seed.is_empty() {
+                error!("--seed must be set else all servers will have different seeds");
+                std::process::exit(1);
+            }
 
-        Command::Remove => {
-            cmd_remove::remove(args.server_count, args.start_port, args.directory_template)?
+            cmd_init::init(global_args, init_args)?
         }
 
-        Command::Start { max_memory } => cmd_start_stop::start(
-            args.server_count,
-            args.start_port,
-            args.directory_template,
-            max_memory,
-        )?,
+        Command::SyncPlugins => cmd_sync_plugins::sync_plugins(global_args)?,
 
-        Command::Stop => {
-            cmd_start_stop::stop(args.server_count, args.start_port, args.directory_template)?
+        Command::Remove => cmd_remove::remove(global_args)?,
+
+        Command::Start { max_memory } => {
+            let start_args = config::start_args(config.start.unwrap_or_default(), max_memory);
+            cmd_start_stop::start(global_args, start_args)?
         }
 
-        Command::Restart { max_memory } => cmd_start_stop::restart(
-            args.server_count,
-            args.start_port,
-            args.directory_template,
-            max_memory,
-        )?,
+        Command::Stop => cmd_start_stop::stop(global_args)?,
+
+        Command::Restart { max_memory } => {
+            let start_args = config::start_args(config.start.unwrap_or_default(), max_memory);
+            cmd_start_stop::restart(global_args, start_args)?
+        }
     }
 
     Ok(())
