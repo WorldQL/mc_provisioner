@@ -46,7 +46,13 @@ impl FromStr for ServerProperty {
         let first = split.get(0).unwrap().to_string();
         let second = split.get(1).unwrap().to_string();
 
-        let reserved = vec!["level-seed", "motd", "query.port", "server-port"];
+        let reserved = vec![
+            "level-seed",
+            "motd",
+            "query.port",
+            "server-port",
+            "white-list",
+        ];
 
         let lower = first.to_lowercase();
         if reserved.contains(&lower.as_ref()) {

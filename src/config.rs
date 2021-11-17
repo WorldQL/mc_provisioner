@@ -98,6 +98,20 @@ pub fn init_args(
     no_copy_paper: Option<bool>,
     server_properties: Vec<ServerProperty>,
 ) -> Result<InitArgs> {
+    let ops = {
+        let mut config_ops = config.ops.unwrap_or_default();
+        config_ops.append(&mut ops);
+
+        HashSet::from_iter(config_ops.into_iter())
+    };
+
+    let white_list = {
+        let mut config_white_list = config.white_list.unwrap_or_default();
+        config_white_list.append(&mut white_list);
+
+        HashSet::from_iter(config_white_list.into_iter())
+    };
+
     let server_properties = {
         let mut arg_props = utils::properties_to_map(server_properties);
         let mut config_props = config
@@ -111,21 +125,13 @@ pub fn init_args(
             .unwrap_or_default();
 
         config_props.append(&mut arg_props);
+
+        // Set white list to true
+        if !white_list.is_empty() {
+            config_props.insert("white-list".into(), "true".into());
+        }
+
         config_props
-    };
-
-    let ops = {
-        let mut config_ops = config.ops.unwrap_or_default();
-        config_ops.append(&mut ops);
-
-        HashSet::from_iter(config_ops.into_iter())
-    };
-
-    let white_list = {
-        let mut config_white_list = config.white_list.unwrap_or_default();
-        config_white_list.append(&mut white_list);
-
-        HashSet::from_iter(config_white_list.into_iter())
     };
 
     let args = InitArgs {

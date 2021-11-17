@@ -5,8 +5,7 @@ use color_eyre::Result;
 use tracing::info;
 
 use crate::config::{GlobalArgs, InitArgs};
-use crate::paper;
-use crate::utils::{self};
+use crate::{paper, utils};
 
 pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
     let paper_jar = paper::download_paper(&args.paper_version)?;
@@ -20,6 +19,20 @@ pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
     let bukkit_exists = bukkit_yml.as_path().exists();
     let spigot_exists = spigot_yml.as_path().exists();
     let paper_exists = paper_yml.as_path().exists();
+
+    let has_ops = !args.ops.is_empty();
+    let ops = args
+        .ops
+        .into_iter()
+        .map(|p| format!("{}\n", p))
+        .collect::<String>();
+
+    let has_white_list = !args.white_list.is_empty();
+    let white_list = args
+        .white_list
+        .into_iter()
+        .map(|p| format!("{}\n", p))
+        .collect::<String>();
 
     let extra_props = args
         .server_properties
@@ -41,6 +54,14 @@ pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
 
         fs::write(directory.join("paper.jar"), &paper_jar)?;
         fs::write(directory.join("eula.txt"), "eula=true\n")?;
+
+        if has_ops {
+            fs::write(directory.join("ops.txt"), &ops)?;
+        }
+
+        if has_white_list {
+            fs::write(directory.join("whitelist.txt"), &white_list)?;
+        }
 
         let properties = format!(
             "level-seed={}\nmotd={}\nquery.port={}\nserver-port={}\n{}",
