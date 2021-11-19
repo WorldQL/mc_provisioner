@@ -49,3 +49,11 @@ cd mcservers
 ```
 
 More commands can be viewed by running `./provisioner help`
+
+### For development iteration
+Use a command like this:
+```bash
+ cp /mnt/c/Users/Jackson/Projects/WorldQLClient/target/WorldQLClient-1.0-SNAPSHOT.jar ./plugins/WorldQLClient-1.0-SNAPSHOT.jar && ./provisioner sync-plugins && ./provisioner restart
+```
+
+Edit to match your own development environment. This will copy the Mammoth jarfile to your plugins folder, sync plugins, then restart.
