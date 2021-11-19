@@ -33,7 +33,7 @@ pub struct Args {
 
 #[derive(Debug, Clone, Parser)]
 enum Command {
-    #[clap(about = "Initialise and configure test servers")]
+    #[clap(about = "Initialise and configure each server")]
     Init {
         /// Paper version [default: "1.17.1"]
         #[clap(short = 'P', long)]
@@ -87,26 +87,26 @@ enum Command {
         server_properties: Vec<ServerProperty>,
     },
 
-    #[clap(about = "Sync plugins to all test servers")]
+    #[clap(about = "Sync plugins directory to all servers")]
     SyncPlugins,
 
     #[clap(about = "Resets each server's world")]
     ResetWorld,
 
-    #[clap(about = "Remove test servers")]
+    #[clap(about = "Remove all server directories")]
     Remove,
 
-    #[clap(about = "Start test servers")]
+    #[clap(about = "Start all servers in the background")]
     Start {
         /// Maximum amount of RAM to allocate to each server [default: "1G"]
         #[clap(short = 'M', long)]
         max_memory: Option<String>,
     },
 
-    #[clap(about = "Stop test servers")]
+    #[clap(about = "Stop each background server process")]
     Stop,
 
-    #[clap(about = "Restart test servers")]
+    #[clap(about = "Restart all servers")]
     Restart {
         /// Maximum amount of RAM to allocate to each server [default: "1G"]
         #[clap(short = 'M', long)]

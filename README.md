@@ -1,59 +1,79 @@
 # Minecraft Server Provisioner [![Build](https://github.com/WorldQL/provisioner/actions/workflows/build.yml/badge.svg)](https://github.com/WorldQL/provisioner/actions/workflows/build.yml)
-> Provision Minecraft servers with ease using Paper and tmux. Useful for creating and managing Mammoth clusters.
+> Provision Mammoth-ready Minecraft clusters with ease!
+
+## Overview
+Provisioner is a tool designed to make the creation of Mammoth clusters a breeze.  
+It is designed to automate the following:
+* Downloading and installing the latest version of Paper for your desired Minecraft version.
+* Setting up `server.properties` for each server.
+* Copying Bukkit, Spigot, and Paper config files to each server instance.
+* Starting and stopping each provisioned server, running each in the background.
+* **And more...**
 
 ## User Guide
+### Commands and Flags
+| Command | Run | Usage |
+| - | - | - |
+| Init | `./provisioner init` | Initialise and configure each server. |
+| Sync Plugins | `./provisioner sync-plugins` | Sync plugins directory to all servers. |
+| Reset World | `./provisioner reset-world` | Resets each server's world files. |
+| Remove | `./provisioner remove` | Remove all server directories. |
+| Start | `./provisioner start` | Start all servers in the background. |
+| Stop | `./provisioner stop` | Stop each background server process. |
+| Restart | `./provisioner restart` | Restart all servers. |
 
-Provisioner will do the following:
-- Download the latest version of Paper for your desired Minecraft version.
-- Copy any `paper.yml`, `bukkit.yml` found in the same directory as MC Provisioner.
-- Create, start, and stop multiple Minecraft servers based on `provisioner.toml`
+You can also run `./provisioner help <command>` to list each commands' available flags.
 
-All you need to do is provide a plugins folder.
+### Configuration
+Passing each command the same flags over and over can be tedious and prone to mistakes, so Provisioner also supports reading from a `provisioner.toml` config file. This must be placed in the directory that you are running Provisioner in.
 
-### Getting started
-1. Download a `provisioner` binary from [GitHub Actions](https://github.com/WorldQL/provisioner/actions). Place it in an empty folder called "mcservers" (or whatever you want).
-2. (optional) Copy `paper.yml`, `bukkit.yml`, and/or a `plugins/` folder from an existing Minecraft server with your desired configuration.
-3. Create a `provisioner.toml` configuration file.
+Most config properties have a default value, and any CLI flags will always take priority. Use `./provisioner help` for a list of default values and what each flag/property does.
 
-### Example provisioner.toml
+#### Example Configuration
 ```toml
 [global]
 server_count = 3
+start_port = 25565
+directory_template = "Mammoth Server"
 
 [init]
 paper_version = "1.17.1"
 level_seed = "mammoth"
+ops = ["Steve", "Alex"]
+# ... white_list, skip_plugins, no_copy_bukkit, no_copy_spigot, no_copy_paper ...
 
 [init.server_properties]
-max-players="25"
-view-distance="6"
-spawn-protection="0"
-difficulty="peaceful"
-online-mode="true"
-rate-limit="0"
-```
-This will configure three servers based on your template but with unique ports.
-
-### Folder structure
-You should have a folder that has contents that look like this:
-```bash
-paper.yml  plugins/  provisioner*  provisioner.toml
+# Set extra `server.properties` values here, these will be the same for every server
+# !! All properties must be represented as strings !!
+spawn-protection = "0"
+rate-limit = "0"
+difficulty = "peaceful"
+online-mode = "false"
 ```
 
-### Creating and managing servers
-```bash
-# Enter your Minecraft servers directory
-cd mcservers
-./provisioner init
-./provisioner start
+This will configure 3 servers with ports 25565 to 25567
+
+### Getting Started
+1. Download the latest `provisioner` binary from [GitHub Actions](https://github.com/WorldQL/mc_provisioner/actions/workflows/build.yml) and either save it to a directory where you will be managing your servers, or add it to your PATH for global access.
+2. *__Optional__: Copy `bukkit.yml`, `spigot.yml`, `paper.yml`, and/or a `plugins` directory into the directory where you will be managing the servers.*
+3. Create and fill out a `provisioner.toml` config file for ease of use.
+4. Run `./provisioner init` to create your servers and then `./provisioner start` to run them all in the background.
+
+### Use in Mammoth Development
+To make your life a lot easier when developing [Mammoth](https://github.com/WorldQL/mammoth), we recommend setting up a symlink from your development directory to the provisioner plugins template directory.
+
+```sh
+# Run in the template plugins/ directory
+$ ln -s /path/to/mammoth/target/WorldQLClient-1.0-SNAPSHOT.jar .
+
+# Using WSL this will start with /mnt/
 ```
 
-More commands can be viewed by running `./provisioner help`
+This will keep the template in sync with the compiled plugin JAR. You can then use a handy one-liner to stop each server, update their plugins, and then restart.
 
-### For development iteration
-Use a command like this:
-```bash
- cp /mnt/c/Users/Jackson/Projects/WorldQLClient/target/WorldQLClient-1.0-SNAPSHOT.jar ./plugins/WorldQLClient-1.0-SNAPSHOT.jar && ./provisioner sync-plugins && ./provisioner restart
+```sh
+$ ./provisioner stop && ./provisioner sync-plugins && ./provisioner start
 ```
 
-Edit to match your own development environment. This will copy the Mammoth jarfile to your plugins folder, sync plugins, then restart.
+## Community
+Join our [Discord Server](https://discord.gg/tDZkXQPzEw) for news and updates surrounding WorldQL and Mammoth!
