@@ -54,7 +54,8 @@ online-mode = "false"
 This will configure 3 servers with ports 25565 to 25567
 
 ### Getting Started
-1. Download the latest `provisioner` binary from [GitHub Actions](https://github.com/WorldQL/mc_provisioner/actions/workflows/build.yml) and either save it to a directory where you will be managing your servers, or add it to your PATH for global access.
+1. Download the latest `provisioner` binary from [GitHub Actions](https://github.com/WorldQL/mc_provisioner/actions/workflows/build.yml). **Be sure to only download binaries for tagged builds.**  
+  Either save it to a directory where you will be managing your servers, or add it to your PATH for global access.
 2. *__Optional__: Copy `bukkit.yml`, `spigot.yml`, `paper.yml`, and/or a `plugins` directory into the directory where you will be managing the servers.*
 3. Create and fill out a `provisioner.toml` config file for ease of use.
 4. Run `./provisioner init` to create your servers and then `./provisioner start` to run them all in the background.
