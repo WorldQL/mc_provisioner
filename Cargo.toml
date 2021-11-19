@@ -1,6 +1,6 @@
 [package]
 name = "provisioner"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 description = "Provision Mammoth-ready Minecraft clusters with ease!"
 
