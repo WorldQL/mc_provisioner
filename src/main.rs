@@ -1,4 +1,4 @@
-use clap::{IntoApp, Parser};
+use clap::{IntoApp, Parser, ValueHint};
 use clap_generate::Shell;
 use color_eyre::Result;
 use tracing::{error, warn};
@@ -17,15 +17,15 @@ mod utils;
 #[clap(about, version)]
 pub struct Args {
     /// Number of servers to initialise [default: 2]
-    #[clap(short = 'c', long)]
+    #[clap(short = 'c', long, value_hint = ValueHint::Other)]
     server_count: Option<u8>,
 
     /// Server port to start counting at [default: 25565]
-    #[clap(short = 'p', long)]
+    #[clap(short = 'p', long, value_hint = ValueHint::Other)]
     start_port: Option<u16>,
 
     /// Directory template, appends server port [default: "Mammoth Server"]
-    #[clap(short, long)]
+    #[clap(short, long, value_hint = ValueHint::Other)]
     directory_template: Option<String>,
 
     #[clap(subcommand)]
@@ -37,11 +37,11 @@ enum Command {
     #[clap(about = "Initialise and configure each server")]
     Init {
         /// Paper version [default: "1.17.1"]
-        #[clap(short = 'P', long)]
+        #[clap(short = 'P', long, value_hint = ValueHint::Other)]
         paper_version: Option<String>,
 
         /// World seed for all servers
-        #[clap(short, long = "seed")]
+        #[clap(short, long = "seed", value_hint = ValueHint::Other)]
         level_seed: Option<String>,
 
         /// Server Operators
@@ -49,7 +49,8 @@ enum Command {
             short = 'o',
             long,
             multiple_occurrences = true,
-            multiple_values = false
+            multiple_values = false,
+            value_hint = ValueHint::Other
         )]
         ops: Vec<String>,
 
@@ -58,12 +59,12 @@ enum Command {
             short = 'w',
             long,
             multiple_occurrences = true,
-            multiple_values = false
+            multiple_values = false, value_hint = ValueHint::Other
         )]
         white_list: Vec<String>,
 
         /// Don't copy Plugins directory
-        #[clap(short, long)]
+        #[clap(short, long, value_hint = ValueHint::Other)]
         skip_plugins: Option<bool>,
 
         /// Don't copy bukkit.yml
@@ -83,7 +84,8 @@ enum Command {
             short = 'p',
             long,
             multiple_occurrences = true,
-            multiple_values = false
+            multiple_values = false,
+            value_hint = ValueHint::Other
         )]
         server_properties: Vec<ServerProperty>,
     },
@@ -110,7 +112,7 @@ enum Command {
     #[clap(about = "Restart all servers")]
     Restart {
         /// Maximum amount of RAM to allocate to each server [default: "1G"]
-        #[clap(short = 'M', long)]
+        #[clap(short = 'M', long, value_hint = ValueHint::Other)]
         max_memory: Option<String>,
     },
 
