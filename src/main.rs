@@ -1,4 +1,5 @@
-use clap::Parser;
+use clap::{IntoApp, Parser};
+use clap_generate::Shell;
 use color_eyre::Result;
 use tracing::{error, warn};
 use utils::ServerProperty;
@@ -112,6 +113,13 @@ enum Command {
         #[clap(short = 'M', long)]
         max_memory: Option<String>,
     },
+
+    #[clap(about = "Generate shell completions")]
+    Completions {
+        /// CLI shell type
+        #[clap(arg_enum)]
+        shell: Shell,
+    },
 }
 
 fn main() -> Result<()> {
@@ -185,6 +193,13 @@ fn main() -> Result<()> {
         Command::Restart { max_memory } => {
             let start_args = config::start_args(config.start.unwrap_or_default(), max_memory);
             cmd_start_stop::restart(global_args, start_args)?
+        }
+
+        Command::Completions { shell } => {
+            let mut app = Args::into_app();
+            let app_name = app.get_name().to_string();
+
+            clap_generate::generate(shell, &mut app, app_name, &mut std::io::stdout());
         }
     }
 
