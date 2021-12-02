@@ -8,3 +8,11 @@ This is a node.js script which automatically updates a Mammoth deployment. It do
 3. runs `./provisioner sync-plugins && ./provisioner start`
 
 We run this script on a schedule using cron to have a developer Mammoth server which periodically updates to the latest pushed build.
+
+## User guide
+Run `yarn install` and create a `.env` file with the following configuration:
+```
+GITHUB_ACCESS_TOKEN=ghp_youraccesstoken
+MC_SERVERS_DIRECTORY=/path/to/your/mc/servers
+WORLDQL_DIRECTORY=/path/to/worldql/directory
+```
