@@ -66,8 +66,12 @@ const extractArtifact = async (zipped, directory) => {
 }
 
 ;(async () => {
-  const directory = process.env.DEPLOY_DIRECTORY ?? './deployment'
-  await mkdirp(directory)
+  const wqlDir = process.env.WORLDQL_DIRECTORY ?? './worldql'
+  const serversDir = process.env.SERVERS_DIRECTORY ?? './servers'
+
+  // Create directories
+  await mkdirp(wqlDir)
+  await mkdirp(serversDir)
 
   const wqlJob = async () => {
     // Setup job logger
@@ -75,14 +79,14 @@ const extractArtifact = async (zipped, directory) => {
 
     // Clean previous bin
     log('cleaning previous binary')
-    const binPath = joinPath(directory, 'worldql_server')
+    const binPath = joinPath(wqlDir, 'worldql_server')
     await rimraf(binPath)
 
     // Extract new bin
     log('downloading latest artifact')
     const buf = await downloadLatestArtifact('worldql', 'worldql_server')
     log('extracting...')
-    await extractArtifact(buf, directory)
+    await extractArtifact(buf, wqlDir)
 
     // Make executable
     log('making binary executable')
@@ -95,7 +99,7 @@ const extractArtifact = async (zipped, directory) => {
 
     // Clean previous plugins directory
     log('cleaning previous plugins directory')
-    const pluginsDir = joinPath(directory, 'plugins')
+    const pluginsDir = joinPath(serversDir, 'plugins')
     await rimraf(pluginsDir)
     await mkdirp(pluginsDir)
 
@@ -112,14 +116,14 @@ const extractArtifact = async (zipped, directory) => {
 
     // Clean previous bin
     log('cleaning previous binary')
-    const binPath = joinPath(directory, 'provisioner')
+    const binPath = joinPath(serversDir, 'provisioner')
     await rimraf(binPath)
 
     // Extract new bin
     log('downloading latest artifact')
     const buf = await downloadLatestArtifact('worldql', 'mc_provisioner')
     log('extracting...')
-    await extractArtifact(buf, directory)
+    await extractArtifact(buf, serversDir)
 
     // Make executable
     log('making binary executable')

@@ -1,6 +1,7 @@
 node_modules/
 workdir/
-deployment/
+worldql/
+servers/
 .pnp.*
 .yarn/*
 !.yarn/patches
