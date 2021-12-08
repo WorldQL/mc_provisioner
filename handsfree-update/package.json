@@ -5,7 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "update": "yarn node ./src/update.mjs"
+    "update": "yarn node ./src/update.mjs",
+    "restart": "yarn node ./src/restart.mjs"
   },
   "dependencies": {
     "@octokit/rest": "^18.12.0",
