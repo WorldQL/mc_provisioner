@@ -39,7 +39,11 @@ const downloadLatestArtifact = async (owner, repo) => {
     throw new Error(`no artifacts found for ${owner}/${repo}`)
   }
 
-  const latest = artifacts[0]
+  let latest = artifacts[0];
+  if (repo == 'worldql_server') {
+    latest = artifacts.find(e => e.name == "worldql_server_x86linux")
+  }
+
   const artifactResp = await octokit.request('GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}', {
     owner,
     repo,
@@ -65,7 +69,7 @@ const extractArtifact = async (zipped, directory) => {
   }
 }
 
-;(async () => {
+(async () => {
   const wqlDir = process.env.WORLDQL_DIRECTORY ?? './worldql'
   const serversDir = process.env.SERVERS_DIRECTORY ?? './servers'
 
