@@ -28,7 +28,13 @@ const octokit = new Octokit({
   userAgent: `${name} v${version}`
 })
 
-const downloadLatestArtifact = async (owner, repo) => {
+/**
+ * @param {string} owner
+ * @param {string} repo
+ * @param {string|((name: string) => boolean)} [artifactName]
+ * @returns
+ */
+const downloadLatestArtifact = async (owner, repo, artifactName) => {
   const artifactsResp = await octokit.request('GET /repos/{owner}/{repo}/actions/artifacts', {
     owner,
     repo,
@@ -39,21 +45,30 @@ const downloadLatestArtifact = async (owner, repo) => {
     throw new Error(`no artifacts found for ${owner}/${repo}`)
   }
 
-  let latest = artifacts[0];
-  if (repo == 'worldql_server') {
-    latest = artifacts.find(e => e.name == "worldql_server_x86linux")
+  const artifact = artifactName === undefined
+    ? artifacts[0]
+    : typeof artifactName === 'string'
+    ? artifacts.find(x => x.name === artifactName)
+    : artifacts.find(artifactName)
+
+  if (artifact === undefined) {
+    throw new Error('Could not find specified artifact')
   }
 
   const artifactResp = await octokit.request('GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}', {
     owner,
     repo,
-    artifact_id: latest.id,
+    artifact_id: artifact.id,
     archive_format: 'zip',
   })
 
   return Buffer.from(artifactResp.data)
 }
 
+/**
+ * @param {Buffer} zipped
+ * @param {string} directory
+ */
 const extractArtifact = async (zipped, directory) => {
   const zip = new JSZip()
   await zip.loadAsync(zipped)
@@ -88,7 +103,7 @@ const extractArtifact = async (zipped, directory) => {
 
     // Extract new bin
     log('downloading latest artifact')
-    const buf = await downloadLatestArtifact('worldql', 'worldql_server')
+    const buf = await downloadLatestArtifact('worldql', 'worldql_server', 'worldql_server_linux_x86')
     log('extracting...')
     await extractArtifact(buf, wqlDir)
 
