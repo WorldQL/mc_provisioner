@@ -91,7 +91,11 @@ pub fn restart(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
         }
 
         // Wait for server to shutdown
-        thread::sleep(Duration::from_millis(200));
+        let exit_handle = format!("{}_exit", &name);
+        if run_cmd!(tmux wait $exit_handle).is_err() {
+            error!("failed to restart \"{}\"", &name);
+            continue;
+        }
 
         let run = format!("java -Xmx{} -jar paper.jar nogui", &args.max_memory);
         if run_cmd!(tmux send -t $name $run ENTER).is_err() {
