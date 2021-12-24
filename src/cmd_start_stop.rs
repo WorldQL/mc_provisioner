@@ -30,7 +30,7 @@ pub fn start(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
             continue;
         }
 
-        let run = format!("java -Xmx{} -jar paper.jar nogui", &args.max_memory);
+        let run = format!("java -Xmx{} -jar paper.jar nogui ; tmux wait -S {}_exit", &args.max_memory, &name);
         if run_cmd!(tmux send -t $name $run ENTER).is_err() {
             error!("failed to start \"{}\"", &name);
             continue;
@@ -50,11 +50,20 @@ pub fn stop(global_args: GlobalArgs) -> Result<()> {
     for (_, _, directory, _) in server_iter {
         let name = directory.to_str().unwrap();
 
-        info!("killing tmux session: {}", &name);
-        if run_cmd!(tmux kill-session -t $name).is_err() {
+        info!("gracefully stopping tmux session: {}", &name);
+        if run_cmd!(tmux send -t $name C-c).is_err() {
             error!("failed to stop \"{}\"", &name);
             continue;
         }
+
+        // TODO: Forcefully exit after N seconds
+        let exit_handle = format!("{}_exit", &name);
+        if run_cmd!(tmux wait $exit_handle).is_err() {
+            error!("failed to stop \"{}\"", &name);
+            continue;
+        }
+
+        info!("stopped tmux session: {}", &name);
     }
 
     Ok(())
