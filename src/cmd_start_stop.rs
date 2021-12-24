@@ -27,7 +27,11 @@ pub fn start(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
             continue;
         }
 
-        let run = format!("java -Xmx{} -jar paper.jar nogui ; tmux wait -S {}_exit", &args.max_memory, &name);
+        let run = format!(
+            "java -Xmx{} -jar paper.jar nogui ; tmux wait -S {}_exit",
+            &args.max_memory, &name
+        );
+
         if run_cmd!(tmux send -t $name $run ENTER).is_err() {
             error!("failed to start \"{}\"", &name);
             continue;
