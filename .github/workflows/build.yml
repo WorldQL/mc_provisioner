@@ -38,10 +38,26 @@ jobs:
       - name: Strip binary
         run: strip target/release/provisioner
       - name: Upload binary
+        if: startsWith(github.ref, 'refs/tags/') == false
         uses: actions/upload-artifact@v1
         with:
           name: provisioner
           path: target/release/provisioner
+      - name: Extract Release Version
+        if: startsWith(github.ref, 'refs/tags/')
+        id: get_version
+        shell: bash
+        run: echo ::set-output name=version::${GITHUB_REF#refs/tags/v}
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: mc_provisioner v${{ steps.get_version.outputs.version }}
+          files: target/release/provisioner
+          generate_release_notes: true
+
   checks:
     runs-on: ubuntu-latest
     steps:
