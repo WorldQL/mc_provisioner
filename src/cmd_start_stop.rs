@@ -63,6 +63,11 @@ pub fn stop(global_args: GlobalArgs) -> Result<()> {
             continue;
         }
 
+        if run_cmd!(tmux kill-session -t $name).is_err() {
+            error!("failed to stop \"{}\"", &name);
+            continue;
+        }
+
         info!("stopped tmux session: {}", &name);
     }
 
