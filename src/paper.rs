@@ -16,6 +16,7 @@ static CLIENT: Lazy<Client> = Lazy::new(|| {
 });
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct PaperVersionResponse {
     project_id: String,
     project_name: String,
@@ -36,6 +37,7 @@ fn latest_paper_build(version: &str) -> Result<u16> {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct PaperBuildResponse {
     project_id: String,
     project_name: String,
@@ -45,6 +47,7 @@ struct PaperBuildResponse {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct PaperBuildDownload {
     name: String,
     sha256: String,
