@@ -1,6 +1,3 @@
-use std::thread;
-use std::time::Duration;
-
 use cmd_lib::run_cmd;
 use color_eyre::Result;
 use tracing::{error, info};
