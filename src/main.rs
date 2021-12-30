@@ -2,7 +2,7 @@ use clap::{IntoApp, Parser, ValueHint};
 use clap_generate::Shell;
 use color_eyre::Result;
 use tracing::{error, warn};
-use utils::ServerProperty;
+use utils::{ServerMemory, ServerProperty};
 
 mod cmd_init;
 mod cmd_remove;
@@ -103,7 +103,7 @@ enum Command {
     Start {
         /// Maximum amount of RAM to allocate to each server [default: "1G"]
         #[clap(short = 'M', long)]
-        max_memory: Option<String>,
+        max_memory: Option<ServerMemory>,
     },
 
     #[clap(about = "Stop each background server process")]
@@ -113,7 +113,7 @@ enum Command {
     Restart {
         /// Maximum amount of RAM to allocate to each server [default: "1G"]
         #[clap(short = 'M', long, value_hint = ValueHint::Other)]
-        max_memory: Option<String>,
+        max_memory: Option<ServerMemory>,
     },
 
     #[clap(about = "Generate shell completions")]

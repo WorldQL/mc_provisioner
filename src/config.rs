@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use color_eyre::Result;
 use serde::Deserialize;
 
-use crate::utils::{self, ServerProperty};
+use crate::utils::{self, ServerMemory, ServerProperty};
 use crate::Args;
 
 // region: TOML
@@ -37,7 +37,7 @@ pub struct InitConfig {
 
 #[derive(Debug, Default, Deserialize)]
 pub struct StartConfig {
-    max_memory: Option<String>,
+    max_memory: Option<ServerMemory>,
 }
 
 pub fn read_config() -> Result<Config> {
@@ -153,10 +153,10 @@ pub fn init_args(
 
 #[derive(Debug)]
 pub struct StartArgs {
-    pub max_memory: String,
+    pub max_memory: ServerMemory,
 }
 
-pub fn start_args(config: StartConfig, max_memory: Option<String>) -> StartArgs {
+pub fn start_args(config: StartConfig, max_memory: Option<ServerMemory>) -> StartArgs {
     StartArgs {
         max_memory: max_memory
             .or(config.max_memory)
