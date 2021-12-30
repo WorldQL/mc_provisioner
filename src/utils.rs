@@ -91,17 +91,41 @@ pub fn properties_to_map(vec: Vec<ServerProperty>) -> BTreeMap<String, String> {
         .collect::<BTreeMap<_, _>>()
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ServerMemory(u64);
+// region: ServerMemory
+#[derive(Debug, Clone)]
+pub struct ServerMemory(String, u64);
 
-impl ServerMemory {
-    pub fn value(&self) -> u64 {
-        self.0
+// region: Traits
+impl Display for ServerMemory {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
+impl PartialEq for ServerMemory {
+    fn eq(&self, other: &Self) -> bool {
+        self.1 == other.1
+    }
+}
+
+impl Eq for ServerMemory {}
+
+impl PartialOrd for ServerMemory {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.1.partial_cmp(&other.1)
+    }
+}
+
+impl Ord for ServerMemory {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.1.cmp(&other.1)
+    }
+}
+// endregion
+
+// region: Parsing
 #[derive(Debug, Error)]
-enum MemoryParseError {
+pub enum MemoryParseError {
     #[error("string cannot be empty")]
     EmptyString,
 
@@ -133,7 +157,10 @@ impl FromStr for ServerMemory {
         };
 
         let parsed = number.parse::<u64>()?;
-        Ok(ServerMemory(parsed * multi))
+        let value = parsed * multi;
+
+        let mem = ServerMemory(memory.to_string(), value);
+        Ok(mem)
     }
 }
 
@@ -152,7 +179,9 @@ impl<'de> Deserialize<'de> for ServerMemory {
         str.parse().map_err(serde::de::Error::custom)
     }
 }
+// endregion
 
+// region: Tests
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;
@@ -163,7 +192,7 @@ mod tests {
             let result = super::ServerMemory::from_str(&input);
 
             assert!(result.is_ok());
-            assert_eq!(result.unwrap().value(), $expected);
+            assert_eq!(result.unwrap().1, $expected);
         };
     }
 
@@ -199,3 +228,5 @@ mod tests {
         normalize_mem_size_err!("10GB");
     }
 }
+// endregion
+// endregion
