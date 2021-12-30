@@ -6,19 +6,19 @@ description = "Provision Mammoth-ready Minecraft clusters with ease!"
 
 [dependencies]
 bytes = "1.1.0"
-clap = { version = "3.0.0-rc.8", features = ["derive"] }
-clap_generate = "3.0.0-rc.8"
+clap = { version = "3.0.0-rc.9", features = ["derive"] }
+clap_generate = "3.0.0-rc.9"
 cmd_lib = "1.3.0"
 color-eyre = "0.5.11"
 copy_dir = "0.1.2"
 fs_extra = "1.2.0"
-once_cell = "1.8.0"
-reqwest = { version = "0.11.7", features = ["json", "blocking"] }
-serde = { version = "1.0.131", features = ["derive"] }
+once_cell = "1.9.0"
+reqwest = { version = "0.11.8", features = ["json", "blocking"] }
+serde = { version = "1.0.132", features = ["derive"] }
 thiserror = "1.0.30"
 toml = "0.5.8"
 tracing = "0.1.29"
-tracing-subscriber = { version = "0.3.3", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.4", features = ["env-filter"] }
 
 [profile.release]
 opt-level = 3
