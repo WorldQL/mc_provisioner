@@ -91,7 +91,11 @@ enum Command {
     },
 
     #[clap(about = "Sync plugins directory to all servers")]
-    SyncPlugins,
+    SyncPlugins {
+        /// Clears plugins directory before syncing [default: false]
+        #[clap(short = 'c', long)]
+        clear: bool,
+    },
 
     #[clap(about = "Resets each server's world")]
     ResetWorld,
@@ -195,7 +199,7 @@ fn main() -> Result<()> {
             cmd_init::init(global_args, init_args)?
         }
 
-        Command::SyncPlugins => cmd_sync_plugins::sync_plugins(global_args)?,
+        Command::SyncPlugins { clear } => cmd_sync_plugins::sync_plugins(global_args, clear)?,
 
         Command::ResetWorld => cmd_reset_world::reset_world(global_args)?,
 
