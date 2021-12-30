@@ -92,7 +92,7 @@ pub fn properties_to_map(vec: Vec<ServerProperty>) -> BTreeMap<String, String> {
 }
 
 #[derive(Debug)]
-struct ServerMemory(u64);
+pub struct ServerMemory(u64);
 
 impl ServerMemory {
     pub fn value(&self) -> u64 {
@@ -134,6 +134,12 @@ impl FromStr for ServerMemory {
 
         let parsed = number.parse::<u64>()?;
         Ok(ServerMemory(parsed * multi))
+    }
+}
+
+impl From<&str> for ServerMemory {
+    fn from(memory: &str) -> Self {
+        Self::from_str(memory).unwrap()
     }
 }
 
