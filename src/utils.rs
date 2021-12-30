@@ -91,7 +91,7 @@ pub fn properties_to_map(vec: Vec<ServerProperty>) -> BTreeMap<String, String> {
         .collect::<BTreeMap<_, _>>()
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ServerMemory(u64);
 
 impl ServerMemory {
