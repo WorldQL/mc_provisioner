@@ -88,3 +88,62 @@ pub fn properties_to_map(vec: Vec<ServerProperty>) -> BTreeMap<String, String> {
         .map(|p| (p.0, p.1))
         .collect::<BTreeMap<_, _>>()
 }
+
+pub fn normalize_mem_size(memory: &str) -> Option<u64> {
+    let len = memory.len();
+    let number = &memory[..len - 1];
+    let scale = (&memory[len - 1..]).to_lowercase().chars().next().unwrap();
+
+    let multi = match scale {
+        'k' => 1024,
+        'm' => u64::pow(1024, 2),
+        'g' => u64::pow(1024, 3),
+
+        _ => return None,
+    };
+
+    number.parse::<u64>().ok().map(|value| value * multi)
+}
+
+#[cfg(test)]
+mod tests {
+    macro_rules! normalize_mem_size_ok {
+        ($input:tt, $expected:tt) => {
+            let input = $input;
+            let result = super::normalize_mem_size(&input);
+
+            assert!(result.is_some());
+            assert_eq!(result.unwrap(), $expected);
+        };
+    }
+
+    #[test]
+    fn test_normalize_mem_size_ok() {
+        normalize_mem_size_ok!("1k", 1024);
+        normalize_mem_size_ok!("1K", 1024);
+        normalize_mem_size_ok!("10k", 10240);
+        normalize_mem_size_ok!("10K", 10240);
+        normalize_mem_size_ok!("10m", 10485760);
+        normalize_mem_size_ok!("10M", 10485760);
+        normalize_mem_size_ok!("10g", 10737418240);
+        normalize_mem_size_ok!("10G", 10737418240);
+    }
+
+    macro_rules! normalize_mem_size_err {
+        ($input:tt) => {
+            let input = $input;
+            let result = super::normalize_mem_size(&input);
+
+            assert!(result.is_none());
+        };
+    }
+
+    #[test]
+    fn test_normalize_mem_size_err() {
+        normalize_mem_size_err!("10");
+        normalize_mem_size_err!("10kb");
+        normalize_mem_size_err!("10KB");
+        normalize_mem_size_err!("10gb");
+        normalize_mem_size_err!("10GB");
+    }
+}
