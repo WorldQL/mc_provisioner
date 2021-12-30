@@ -145,7 +145,11 @@ pub fn restart(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
             continue;
         }
 
-        let run = format!("java {} -jar paper.jar nogui", &jvm_args);
+        let run = format!(
+            "java {} -jar paper.jar nogui ; tmux wait -S {}_exit",
+            &jvm_args, &name
+        );
+
         if run_cmd!(tmux send -t $name $run ENTER).is_err() {
             error!("failed to restart \"{}\"", &name);
             continue;
