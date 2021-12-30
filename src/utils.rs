@@ -1,9 +1,11 @@
 use std::collections::BTreeMap;
 use std::fmt::Display;
+use std::num::ParseIntError;
 use std::path::PathBuf;
 use std::str::FromStr;
 
 use color_eyre::Result;
+use serde::Deserialize;
 use thiserror::Error;
 
 type ServerInfo = (u8, u16, PathBuf, String);
@@ -89,31 +91,73 @@ pub fn properties_to_map(vec: Vec<ServerProperty>) -> BTreeMap<String, String> {
         .collect::<BTreeMap<_, _>>()
 }
 
-pub fn normalize_mem_size(memory: &str) -> Option<u64> {
-    let len = memory.len();
-    let number = &memory[..len - 1];
-    let scale = (&memory[len - 1..]).to_lowercase().chars().next().unwrap();
+#[derive(Debug)]
+struct ServerMemory(u64);
 
-    let multi = match scale {
-        'k' => 1024,
-        'm' => u64::pow(1024, 2),
-        'g' => u64::pow(1024, 3),
+impl ServerMemory {
+    pub fn value(&self) -> u64 {
+        self.0
+    }
+}
 
-        _ => return None,
-    };
+#[derive(Debug, Error)]
+enum MemoryParseError {
+    #[error("string cannot be empty")]
+    EmptyString,
 
-    number.parse::<u64>().ok().map(|value| value * multi)
+    #[error("unknown size suffix: {0}")]
+    InvalidSize(char),
+
+    #[error(transparent)]
+    ParseIntError(#[from] ParseIntError),
+}
+
+impl FromStr for ServerMemory {
+    type Err = MemoryParseError;
+
+    fn from_str(memory: &str) -> Result<Self, Self::Err> {
+        if memory.is_empty() {
+            return Err(MemoryParseError::EmptyString);
+        }
+
+        let len = memory.len();
+        let number = &memory[..len - 1];
+        let scale = (&memory[len - 1..]).to_lowercase().chars().next().unwrap();
+
+        let multi = match scale {
+            'k' => 1024,
+            'm' => u64::pow(1024, 2),
+            'g' => u64::pow(1024, 3),
+
+            _ => return Err(MemoryParseError::InvalidSize(scale)),
+        };
+
+        let parsed = number.parse::<u64>()?;
+        Ok(ServerMemory(parsed * multi))
+    }
+}
+
+impl<'de> Deserialize<'de> for ServerMemory {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let str = String::deserialize(deserializer)?;
+        str.parse().map_err(serde::de::Error::custom)
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     macro_rules! normalize_mem_size_ok {
         ($input:tt, $expected:tt) => {
             let input = $input;
-            let result = super::normalize_mem_size(&input);
+            let result = super::ServerMemory::from_str(&input);
 
-            assert!(result.is_some());
-            assert_eq!(result.unwrap(), $expected);
+            assert!(result.is_ok());
+            assert_eq!(result.unwrap().value(), $expected);
         };
     }
 
@@ -132,15 +176,17 @@ mod tests {
     macro_rules! normalize_mem_size_err {
         ($input:tt) => {
             let input = $input;
-            let result = super::normalize_mem_size(&input);
+            let result = super::ServerMemory::from_str(&input);
 
-            assert!(result.is_none());
+            assert!(result.is_err());
         };
     }
 
     #[test]
     fn test_normalize_mem_size_err() {
+        normalize_mem_size_err!("");
         normalize_mem_size_err!("10");
+        normalize_mem_size_err!("abc");
         normalize_mem_size_err!("10kb");
         normalize_mem_size_err!("10KB");
         normalize_mem_size_err!("10gb");
