@@ -60,6 +60,7 @@ jobs:
 
   checks:
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') == false
     steps:
       - name: Checkout
         uses: actions/checkout@v2
