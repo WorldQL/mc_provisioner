@@ -38,6 +38,8 @@ pub struct InitConfig {
 #[derive(Debug, Default, Deserialize)]
 pub struct StartConfig {
     max_memory: Option<ServerMemory>,
+    use_aikar_flags: Option<bool>,
+    jvm_args: Option<String>,
 }
 
 pub fn read_config() -> Result<Config> {
@@ -154,13 +156,22 @@ pub fn init_args(
 #[derive(Debug)]
 pub struct StartArgs {
     pub max_memory: ServerMemory,
+    pub use_aikar_flags: bool,
+    pub jvm_args: Option<String>,
 }
 
-pub fn start_args(config: StartConfig, max_memory: Option<ServerMemory>) -> StartArgs {
+pub fn start_args(
+    config: StartConfig,
+    max_memory: Option<ServerMemory>,
+    use_aikar_flags: Option<bool>,
+    jvm_args: Option<String>,
+) -> StartArgs {
     StartArgs {
         max_memory: max_memory
             .or(config.max_memory)
             .unwrap_or_else(|| "1G".into()),
+        use_aikar_flags: use_aikar_flags.or(config.use_aikar_flags).unwrap_or(false),
+        jvm_args: jvm_args.or(config.jvm_args),
     }
 }
 // endregion

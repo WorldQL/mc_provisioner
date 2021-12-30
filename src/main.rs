@@ -102,8 +102,16 @@ enum Command {
     #[clap(about = "Start all servers in the background")]
     Start {
         /// Maximum amount of RAM to allocate to each server [default: "1G"]
-        #[clap(short = 'M', long)]
+        #[clap(short = 'M', long, value_hint = ValueHint::Other)]
         max_memory: Option<ServerMemory>,
+
+        /// Use Aikar's JVM flags [default: false]
+        #[clap(long)]
+        use_aikar_flags: Option<bool>,
+
+        /// Additional JVM args. Overides Aikar's flags if set
+        #[clap(long, value_hint = ValueHint::Other)]
+        jvm_args: Option<String>,
     },
 
     #[clap(about = "Stop each background server process")]
@@ -114,6 +122,14 @@ enum Command {
         /// Maximum amount of RAM to allocate to each server [default: "1G"]
         #[clap(short = 'M', long, value_hint = ValueHint::Other)]
         max_memory: Option<ServerMemory>,
+
+        /// Use Aikar's JVM flags [default: false]
+        #[clap(long)]
+        use_aikar_flags: Option<bool>,
+
+        /// Additional JVM args. Overides Aikar's flags if set
+        #[clap(long, value_hint = ValueHint::Other)]
+        jvm_args: Option<String>,
     },
 
     #[clap(about = "Generate shell completions")]
@@ -185,15 +201,33 @@ fn main() -> Result<()> {
 
         Command::Remove => cmd_remove::remove(global_args)?,
 
-        Command::Start { max_memory } => {
-            let start_args = config::start_args(config.start.unwrap_or_default(), max_memory);
+        Command::Start {
+            max_memory,
+            use_aikar_flags,
+            jvm_args,
+        } => {
+            let start_args = config::start_args(
+                config.start.unwrap_or_default(),
+                max_memory,
+                use_aikar_flags,
+                jvm_args,
+            );
             cmd_start_stop::start(global_args, start_args)?
         }
 
         Command::Stop => cmd_start_stop::stop(global_args)?,
 
-        Command::Restart { max_memory } => {
-            let start_args = config::start_args(config.start.unwrap_or_default(), max_memory);
+        Command::Restart {
+            max_memory,
+            use_aikar_flags,
+            jvm_args,
+        } => {
+            let start_args = config::start_args(
+                config.start.unwrap_or_default(),
+                max_memory,
+                use_aikar_flags,
+                jvm_args,
+            );
             cmd_start_stop::restart(global_args, start_args)?
         }
 
