@@ -20,6 +20,7 @@ pub struct GlobalConfig {
     server_count: Option<u8>,
     start_port: Option<u16>,
     directory_template: Option<String>,
+    timeout_secs: Option<u8>,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -61,6 +62,7 @@ pub struct GlobalArgs {
     pub server_count: u8,
     pub start_port: u16,
     pub directory_template: String,
+    pub timeout_secs: u8,
 }
 
 pub fn global_args(config: GlobalConfig, args: Args) -> GlobalArgs {
@@ -71,6 +73,7 @@ pub fn global_args(config: GlobalConfig, args: Args) -> GlobalArgs {
             .directory_template
             .or(config.directory_template)
             .unwrap_or_else(|| "Mammoth Server".into()),
+        timeout_secs: args.timeout_secs.or(config.timeout_secs).unwrap_or(10),
     }
 }
 

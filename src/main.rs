@@ -28,6 +28,10 @@ pub struct Args {
     #[clap(short, long, value_hint = ValueHint::Other)]
     directory_template: Option<String>,
 
+    /// Graceful stop / restart timeout seconds [default: 10]
+    #[clap(short, long, value_hint = ValueHint::Other)]
+    timeout_secs: Option<u8>,
+
     #[clap(subcommand)]
     command: Command,
 }
