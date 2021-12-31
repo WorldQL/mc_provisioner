@@ -1,6 +1,10 @@
+use std::process::Command;
+use std::time::Duration;
+
 use cmd_lib::run_cmd;
 use color_eyre::Result;
-use tracing::{error, info};
+use tracing::{error, info, warn};
+use wait_timeout::ChildExt;
 
 use crate::config::{GlobalArgs, StartArgs};
 use crate::utils::{self, ServerMemory};
@@ -103,11 +107,25 @@ pub fn stop(global_args: GlobalArgs) -> Result<()> {
             continue;
         }
 
-        // TODO: Forcefully exit after N seconds
+        // Wait for server to shut down
         let exit_handle = format!("{}_exit", &name);
-        if run_cmd!(tmux wait $exit_handle).is_err() {
-            error!("failed to stop \"{}\"", &name);
-            continue;
+        let mut child = match Command::new("tmux").arg("wait").arg(exit_handle).spawn() {
+            Ok(child) => child,
+            Err(_) => {
+                error!("failed to stop \"{}\"", &name);
+                continue;
+            }
+        };
+
+        // After N seconds, timeout and kill anyway
+        match child.wait_timeout(Duration::from_secs(5)) {
+            Err(_) => {
+                error!("failed to stop \"{}\"", &name);
+                continue;
+            }
+
+            Ok(None) => warn!("reached wait timeout, forcefully killing: {}", &name),
+            _ => (),
         }
 
         if run_cmd!(tmux kill-session -t $name).is_err() {
@@ -138,11 +156,28 @@ pub fn restart(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
             continue;
         }
 
-        // Wait for server to shutdown
+        // Wait for server to shut down
         let exit_handle = format!("{}_exit", &name);
-        if run_cmd!(tmux wait $exit_handle).is_err() {
-            error!("failed to restart \"{}\"", &name);
-            continue;
+        let mut child = match Command::new("tmux").arg("wait").arg(exit_handle).spawn() {
+            Ok(child) => child,
+            Err(_) => {
+                error!("failed to stop \"{}\"", &name);
+                continue;
+            }
+        };
+
+        // After N seconds, timeout and restart anyway
+        match child.wait_timeout(Duration::from_secs(5)) {
+            Err(_) => {
+                error!("failed to stop \"{}\"", &name);
+                continue;
+            }
+
+            Ok(None) => {
+                warn!("reached wait timeout, forcefully restarting: {}", &name);
+                warn!("please manually check that the restart was successful");
+            }
+            _ => (),
         }
 
         let run = format!(
