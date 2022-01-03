@@ -26,7 +26,7 @@ pub struct GlobalConfig {
 
 #[derive(Debug, Default, Deserialize)]
 pub struct InitConfig {
-    paper_version: Option<String>,
+    jar_version: Option<String>,
     level_seed: Option<String>,
     ops: Option<Vec<String>>,
     white_list: Option<Vec<String>>,
@@ -82,7 +82,7 @@ pub fn global_args(config: GlobalConfig, args: Args) -> GlobalArgs {
 
 #[derive(Debug)]
 pub struct InitArgs {
-    pub paper_version: String,
+    pub jar_version: String,
     pub level_seed: String,
     pub ops: HashSet<String>,
     pub white_list: HashSet<String>,
@@ -96,7 +96,7 @@ pub struct InitArgs {
 #[allow(clippy::too_many_arguments)]
 pub fn init_args(
     config: InitConfig,
-    paper_version: Option<String>,
+    jar_version: Option<String>,
     level_seed: Option<String>,
     mut ops: Vec<String>,
     mut white_list: Vec<String>,
@@ -143,9 +143,9 @@ pub fn init_args(
     };
 
     let args = InitArgs {
-        paper_version: paper_version
-            .or(config.paper_version)
-            .unwrap_or_else(|| "1.17.1".into()),
+        jar_version: jar_version
+            .or(config.jar_version)
+            .unwrap_or_else(|| "1.18.1".into()),
         level_seed: level_seed.or(config.level_seed).unwrap_or_default(),
         ops,
         white_list,

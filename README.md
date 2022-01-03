@@ -32,12 +32,13 @@ Most config properties have a default value, and any CLI flags will always take 
 #### Example Configuration
 ```toml
 [global]
+jar_type = "paper"
 server_count = 3
 start_port = 25565
 directory_template = "Mammoth Server"
 
 [init]
-paper_version = "1.17.1"
+jar_version = "1.17.1"
 level_seed = "mammoth"
 ops = ["Steve", "Alex"]
 # ... white_list, skip_plugins, no_copy_bukkit, no_copy_spigot, no_copy_paper ...

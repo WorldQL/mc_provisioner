@@ -8,7 +8,7 @@ use crate::config::{GlobalArgs, InitArgs};
 use crate::utils;
 
 pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
-    let server_jar = global_args.jar_type.download(&args.paper_version)?;
+    let server_jar = global_args.jar_type.download(&args.jar_version)?;
 
     let plugins_dir = PathBuf::from("plugins");
     let bukkit_yml = PathBuf::from("bukkit.yml");

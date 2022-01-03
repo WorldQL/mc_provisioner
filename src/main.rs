@@ -45,9 +45,9 @@ pub struct Args {
 enum Command {
     #[clap(about = "Initialise and configure each server")]
     Init {
-        /// Paper version [default: "1.17.1"]
+        /// Server .jar version [default: "1.18.1"]
         #[clap(short = 'P', long, value_hint = ValueHint::Other)]
-        paper_version: Option<String>,
+        jar_version: Option<String>,
 
         /// World seed for all servers
         #[clap(short, long = "seed", value_hint = ValueHint::Other)]
@@ -171,7 +171,7 @@ fn main() -> Result<()> {
 
     match args.command {
         Command::Init {
-            paper_version,
+            jar_version,
             level_seed,
             ops,
             white_list,
@@ -183,7 +183,7 @@ fn main() -> Result<()> {
         } => {
             let init_args = config::init_args(
                 config.init.unwrap_or_default(),
-                paper_version,
+                jar_version,
                 level_seed,
                 ops,
                 white_list,
