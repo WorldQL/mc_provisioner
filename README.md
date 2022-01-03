@@ -17,10 +17,12 @@ It is designed to automate the following:
 | Init | `./provisioner init` | Initialise and configure each server. |
 | Sync Plugins | `./provisioner sync-plugins` | Sync plugins directory to all servers. |
 | Reset World | `./provisioner reset-world` | Resets each server's world files. |
+| Update Server | `./provisioner update-server` | Update server .jar to the latest build for a given version. |
 | Remove | `./provisioner remove` | Remove all server directories. |
 | Start | `./provisioner start` | Start all servers in the background. |
 | Stop | `./provisioner stop` | Stop each background server process. |
-| Restart | `./provisioner restart` | Restart all servers. |
+| Restart  | `./provisioner restart` | Restart all servers. |
+| Completions | `./provisioner completions` | Generate shell completions. |
 
 You can also run `./provisioner help <command>` to list each commands' available flags.
 
