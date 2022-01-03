@@ -5,7 +5,8 @@ use color_eyre::Result;
 use tracing::info;
 
 use crate::config::{GlobalArgs, InitArgs};
-use crate::{paper, utils};
+use crate::server_jar::paper;
+use crate::utils;
 
 pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
     let paper_jar = paper::download_paper(&args.paper_version)?;

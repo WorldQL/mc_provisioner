@@ -10,7 +10,7 @@ mod cmd_reset_world;
 mod cmd_start_stop;
 mod cmd_sync_plugins;
 mod config;
-mod paper;
+mod server_jar;
 mod utils;
 
 #[derive(Debug, Clone, Parser)]
