@@ -21,6 +21,10 @@ pub struct Args {
     #[clap(short, long, value_hint = ValueHint::Other)]
     jar_type: Option<JarType>,
 
+    /// Server .jar version
+    #[clap(short = 'J', long, value_hint = ValueHint::Other)]
+    jar_version: Option<String>,
+
     /// Number of servers to initialise [default: 2]
     #[clap(short = 'c', long, value_hint = ValueHint::Other)]
     server_count: Option<u8>,
@@ -45,10 +49,6 @@ pub struct Args {
 enum Command {
     #[clap(about = "Initialise and configure each server")]
     Init {
-        /// Server .jar version [default: "1.18.1"]
-        #[clap(short = 'P', long, value_hint = ValueHint::Other)]
-        jar_version: Option<String>,
-
         /// World seed for all servers
         #[clap(short, long = "seed", value_hint = ValueHint::Other)]
         level_seed: Option<String>,
@@ -169,9 +169,13 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if global_args.jar_version.is_empty() {
+        error!("you must specify a server .jar version");
+        std::process::exit(1);
+    }
+
     match args.command {
         Command::Init {
-            jar_version,
             level_seed,
             ops,
             white_list,
@@ -183,7 +187,6 @@ fn main() -> Result<()> {
         } => {
             let init_args = config::init_args(
                 config.init.unwrap_or_default(),
-                jar_version,
                 level_seed,
                 ops,
                 white_list,
@@ -201,7 +204,7 @@ fn main() -> Result<()> {
 
             let init_args = init_args.unwrap();
             if init_args.level_seed.is_empty() {
-                error!("--seed must be set else all servers will have different seeds");
+                error!("you must specify a level seed, else all servers will have different seeds");
                 std::process::exit(1);
             }
 

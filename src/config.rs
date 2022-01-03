@@ -18,6 +18,7 @@ pub struct Config {
 #[derive(Debug, Default, Deserialize)]
 pub struct GlobalConfig {
     jar_type: Option<JarType>,
+    jar_version: Option<String>,
     server_count: Option<u8>,
     start_port: Option<u16>,
     directory_template: Option<String>,
@@ -26,7 +27,6 @@ pub struct GlobalConfig {
 
 #[derive(Debug, Default, Deserialize)]
 pub struct InitConfig {
-    jar_version: Option<String>,
     level_seed: Option<String>,
     ops: Option<Vec<String>>,
     white_list: Option<Vec<String>>,
@@ -61,6 +61,7 @@ pub fn read_config() -> Result<Config> {
 #[derive(Debug)]
 pub struct GlobalArgs {
     pub jar_type: JarType,
+    pub jar_version: String,
     pub server_count: u8,
     pub start_port: u16,
     pub directory_template: String,
@@ -70,6 +71,7 @@ pub struct GlobalArgs {
 pub fn global_args(config: GlobalConfig, args: Args) -> GlobalArgs {
     GlobalArgs {
         jar_type: args.jar_type.or(config.jar_type).unwrap_or_default(),
+        jar_version: args.jar_version.or(config.jar_version).unwrap_or_default(),
         server_count: args.server_count.or(config.server_count).unwrap_or(2),
         start_port: args.start_port.or(config.start_port).unwrap_or(25565),
         directory_template: args
@@ -82,7 +84,6 @@ pub fn global_args(config: GlobalConfig, args: Args) -> GlobalArgs {
 
 #[derive(Debug)]
 pub struct InitArgs {
-    pub jar_version: String,
     pub level_seed: String,
     pub ops: HashSet<String>,
     pub white_list: HashSet<String>,
@@ -96,7 +97,6 @@ pub struct InitArgs {
 #[allow(clippy::too_many_arguments)]
 pub fn init_args(
     config: InitConfig,
-    jar_version: Option<String>,
     level_seed: Option<String>,
     mut ops: Vec<String>,
     mut white_list: Vec<String>,
@@ -143,9 +143,6 @@ pub fn init_args(
     };
 
     let args = InitArgs {
-        jar_version: jar_version
-            .or(config.jar_version)
-            .unwrap_or_else(|| "1.18.1".into()),
         level_seed: level_seed.or(config.level_seed).unwrap_or_default(),
         ops,
         white_list,
