@@ -5,11 +5,10 @@ use color_eyre::Result;
 use tracing::info;
 
 use crate::config::{GlobalArgs, InitArgs};
-use crate::server_jar::paper;
-use crate::utils;
+use crate::{server_jar, utils};
 
 pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
-    let paper_jar = paper::download_paper(&args.paper_version)?;
+    let paper_jar = server_jar::download_jar(&args.paper_version)?;
 
     let plugins_dir = PathBuf::from("plugins");
     let bukkit_yml = PathBuf::from("bukkit.yml");

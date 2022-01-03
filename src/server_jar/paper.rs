@@ -2,18 +2,11 @@ use std::collections::HashMap;
 
 use bytes::Bytes;
 use color_eyre::Result;
-use once_cell::sync::Lazy;
-use reqwest::blocking::{Client, ClientBuilder};
 use serde::Deserialize;
 use tracing::info;
 
-static APP_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
-static CLIENT: Lazy<Client> = Lazy::new(|| {
-    ClientBuilder::new()
-        .user_agent(APP_USER_AGENT)
-        .build()
-        .unwrap()
-});
+use super::http::CLIENT;
+use super::ServerJarProvider;
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
@@ -70,12 +63,15 @@ fn paper_url(version: &str, build_id: u16) -> Result<String> {
     Ok(url)
 }
 
-pub fn download_paper(version: &str) -> Result<Bytes> {
-    let build_id = latest_paper_build(version)?;
-    let download_url = paper_url(version, build_id)?;
+pub(crate) struct PaperJarProvider;
+impl ServerJarProvider for PaperJarProvider {
+    fn download_jar(version: &str) -> Result<Bytes> {
+        let build_id = latest_paper_build(version)?;
+        let download_url = paper_url(version, build_id)?;
 
-    info!("downloading paper.jar build {} for {}", build_id, version);
-    let bytes = CLIENT.get(download_url).send()?.bytes()?;
+        info!("downloading paper.jar build {} for {}", build_id, version);
+        let bytes = CLIENT.get(download_url).send()?.bytes()?;
 
-    Ok(bytes)
+        Ok(bytes)
+    }
 }
