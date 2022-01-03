@@ -4,8 +4,8 @@ use std::path::PathBuf;
 use color_eyre::Result;
 use serde::Deserialize;
 
-use crate::arg_types::{self, ServerMemory, ServerProperty};
-use crate::{utils, Args};
+use crate::arg_types::{self, JarType, ServerMemory, ServerProperty};
+use crate::Args;
 
 // region: TOML
 #[derive(Debug, Default, Deserialize)]
@@ -17,6 +17,7 @@ pub struct Config {
 
 #[derive(Debug, Default, Deserialize)]
 pub struct GlobalConfig {
+    jar_type: Option<JarType>,
     server_count: Option<u8>,
     start_port: Option<u16>,
     directory_template: Option<String>,
@@ -59,6 +60,7 @@ pub fn read_config() -> Result<Config> {
 // region: Merge Config
 #[derive(Debug)]
 pub struct GlobalArgs {
+    pub jar_type: JarType,
     pub server_count: u8,
     pub start_port: u16,
     pub directory_template: String,
@@ -67,6 +69,7 @@ pub struct GlobalArgs {
 
 pub fn global_args(config: GlobalConfig, args: Args) -> GlobalArgs {
     GlobalArgs {
+        jar_type: args.jar_type.or(config.jar_type).unwrap_or_default(),
         server_count: args.server_count.or(config.server_count).unwrap_or(2),
         start_port: args.start_port.or(config.start_port).unwrap_or(25565),
         directory_template: args

@@ -63,7 +63,7 @@ fn paper_url(version: &str, build_id: u16) -> Result<String> {
     Ok(url)
 }
 
-pub(crate) struct PaperJarProvider;
+pub struct PaperJarProvider;
 impl ServerJarProvider for PaperJarProvider {
     fn download_jar(version: &str) -> Result<Bytes> {
         let build_id = latest_paper_build(version)?;

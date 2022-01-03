@@ -1,4 +1,4 @@
-use arg_types::{ServerMemory, ServerProperty};
+use arg_types::{JarType, ServerMemory, ServerProperty};
 use clap::{IntoApp, Parser, ValueHint};
 use clap_complete::Shell;
 use color_eyre::Result;
@@ -17,6 +17,10 @@ mod utils;
 #[derive(Debug, Clone, Parser)]
 #[clap(about, version)]
 pub struct Args {
+    /// Server .jar type [default: "paper"]
+    #[clap(short, long, value_hint = ValueHint::Other)]
+    jar_type: Option<JarType>,
+
     /// Number of servers to initialise [default: 2]
     #[clap(short = 'c', long, value_hint = ValueHint::Other)]
     server_count: Option<u8>,

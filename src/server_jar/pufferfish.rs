@@ -57,7 +57,7 @@ fn get_latest_artifact_url(version: &str) -> Result<(u32, String)> {
     Ok((response.number, artifact_url))
 }
 
-pub(crate) struct PufferfishJarProvider;
+pub struct PufferfishJarProvider;
 impl ServerJarProvider for PufferfishJarProvider {
     fn download_jar(version: &str) -> Result<Bytes> {
         let (build_id, artifact_url) = get_latest_artifact_url(version)?;

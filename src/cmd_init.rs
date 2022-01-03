@@ -5,10 +5,10 @@ use color_eyre::Result;
 use tracing::info;
 
 use crate::config::{GlobalArgs, InitArgs};
-use crate::{server_jar, utils};
+use crate::utils;
 
 pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
-    let paper_jar = server_jar::download_jar(&args.paper_version)?;
+    let server_jar = global_args.jar_type.download(&args.paper_version)?;
 
     let plugins_dir = PathBuf::from("plugins");
     let bukkit_yml = PathBuf::from("bukkit.yml");
@@ -52,8 +52,11 @@ pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
             fs::create_dir(&directory)?;
         }
 
-        fs::write(directory.join("paper.jar"), &paper_jar)?;
         fs::write(directory.join("eula.txt"), "eula=true\n")?;
+        fs::write(
+            directory.join(global_args.jar_type.file_name()),
+            &server_jar,
+        )?;
 
         if has_ops {
             fs::write(directory.join("ops.txt"), &ops)?;

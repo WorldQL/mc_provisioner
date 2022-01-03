@@ -79,8 +79,10 @@ pub fn start(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
         }
 
         let run = format!(
-            "java {} -jar paper.jar nogui ; tmux wait -S {}_exit",
-            &jvm_args, &name
+            "java {} -jar {} nogui ; tmux wait -S {}_exit",
+            &jvm_args,
+            global_args.jar_type.file_name(),
+            &name
         );
 
         if run_cmd!(tmux send -t $name $run ENTER).is_err() {
@@ -184,8 +186,10 @@ pub fn restart(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
         }
 
         let run = format!(
-            "java {} -jar paper.jar nogui ; tmux wait -S {}_exit",
-            &jvm_args, &name
+            "java {} -jar {} nogui ; tmux wait -S {}_exit",
+            &jvm_args,
+            global_args.jar_type.file_name(),
+            &name
         );
 
         if run_cmd!(tmux send -t $name $run ENTER).is_err() {
