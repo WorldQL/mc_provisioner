@@ -134,16 +134,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "clap_generate"
-version = "3.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6860a7a7cdb85c6f6256a3352177ea2e44028187bd8d1b2020352c43a2add3cf"
-dependencies = [
- "clap",
- "clap_complete",
-]
-
-[[package]]
 name = "cmd_lib"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -784,7 +774,7 @@ version = "0.5.1"
 dependencies = [
  "bytes",
  "clap",
- "clap_generate",
+ "clap_complete",
  "cmd_lib",
  "color-eyre",
  "copy_dir",

@@ -1,5 +1,5 @@
 use clap::{IntoApp, Parser, ValueHint};
-use clap_generate::Shell;
+use clap_complete::Shell;
 use color_eyre::Result;
 use tracing::{error, warn};
 use utils::{ServerMemory, ServerProperty};
@@ -243,7 +243,7 @@ fn main() -> Result<()> {
             let mut app = Args::into_app();
             let app_name = app.get_name().to_string();
 
-            clap_generate::generate(shell, &mut app, app_name, &mut std::io::stdout());
+            clap_complete::generate(shell, &mut app, app_name, &mut std::io::stdout());
         }
     }
 
