@@ -10,6 +10,7 @@ mod cmd_remove;
 mod cmd_reset_world;
 mod cmd_start_stop;
 mod cmd_sync_plugins;
+mod cmd_update_server;
 mod config;
 mod server_jar;
 mod utils;
@@ -105,6 +106,9 @@ enum Command {
         #[clap(short = 'c', long)]
         clear: bool,
     },
+
+    #[clap(about = "Update server .jar to the latest build for a given version")]
+    UpdateServer,
 
     #[clap(about = "Resets each server's world")]
     ResetWorld,
@@ -212,6 +216,8 @@ fn main() -> Result<()> {
         }
 
         Command::SyncPlugins { clear } => cmd_sync_plugins::sync_plugins(global_args, clear)?,
+
+        Command::UpdateServer => cmd_update_server::update_server(global_args)?,
 
         Command::ResetWorld => cmd_reset_world::reset_world(global_args)?,
 
