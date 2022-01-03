@@ -1,9 +1,10 @@
+use arg_types::{ServerMemory, ServerProperty};
 use clap::{IntoApp, Parser, ValueHint};
 use clap_complete::Shell;
 use color_eyre::Result;
 use tracing::{error, warn};
-use utils::{ServerMemory, ServerProperty};
 
+mod arg_types;
 mod cmd_init;
 mod cmd_remove;
 mod cmd_reset_world;

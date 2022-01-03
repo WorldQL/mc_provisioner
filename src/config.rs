@@ -4,8 +4,8 @@ use std::path::PathBuf;
 use color_eyre::Result;
 use serde::Deserialize;
 
-use crate::utils::{self, ServerMemory, ServerProperty};
-use crate::Args;
+use crate::arg_types::{self, ServerMemory, ServerProperty};
+use crate::{utils, Args};
 
 // region: TOML
 #[derive(Debug, Default, Deserialize)]
@@ -118,7 +118,7 @@ pub fn init_args(
     };
 
     let server_properties = {
-        let mut arg_props = utils::properties_to_map(server_properties);
+        let mut arg_props = arg_types::properties_to_map(server_properties);
         let mut config_props = config
             .server_properties
             .map(|props| {
@@ -150,7 +150,7 @@ pub fn init_args(
         no_copy_bukkit: no_copy_bukkit.or(config.no_copy_bukkit).unwrap_or_default(),
         no_copy_spigot: no_copy_spigot.or(config.no_copy_spigot).unwrap_or_default(),
         no_copy_paper: no_copy_paper.or(config.no_copy_paper).unwrap_or_default(),
-        server_properties: utils::map_to_properties(server_properties)?,
+        server_properties: arg_types::map_to_properties(server_properties)?,
     };
 
     Ok(args)

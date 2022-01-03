@@ -6,8 +6,9 @@ use color_eyre::Result;
 use tracing::{error, info, warn};
 use wait_timeout::ChildExt;
 
+use crate::arg_types::ServerMemory;
 use crate::config::{GlobalArgs, StartArgs};
-use crate::utils::{self, ServerMemory};
+use crate::utils;
 
 fn generate_jvm_args(args: StartArgs) -> String {
     let mut flags = vec![];
