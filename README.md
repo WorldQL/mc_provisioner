@@ -6,7 +6,7 @@ Provisioner is a tool designed to make the creation of Mammoth clusters a breeze
 It is designed to automate the following:
 * Downloading and installing the latest version of Paper for your desired Minecraft version.
 * Setting up `server.properties` for each server.
-* Copying Bukkit, Spigot, and Paper config files to each server instance.
+* Copying Plugins and other arbitrary config files to each server.
 * Starting and stopping each provisioned server, running each in the background.
 * **And more...**
 
@@ -15,7 +15,7 @@ It is designed to automate the following:
 | Command | Run | Usage |
 | - | - | - |
 | Init | `./provisioner init` | Initialise and configure each server. |
-| Sync Plugins | `./provisioner sync-plugins` | Sync plugins directory to all servers. |
+| Sync | `./provisioner sync` | Sync specified directories to all servers. |
 | Reset World | `./provisioner reset-world` | Resets each server's world files. |
 | Update Server | `./provisioner update-server` | Update server .jar to the latest build for a given version. |
 | Remove | `./provisioner remove` | Remove all server directories. |
@@ -39,11 +39,12 @@ jar_version = "1.18.1"
 server_count = 3
 start_port = 25565
 directory_template = "Mammoth Server"
+sync_dirs = ["./plugins"]
 
 [init]
 level_seed = "mammoth"
 ops = ["Steve", "Alex"]
-# ... white_list, skip_plugins, no_copy_bukkit, no_copy_spigot, no_copy_paper ...
+# ... white_list ...
 
 [init.server_properties]
 # Set extra `server.properties` values here, these will be the same for every server
