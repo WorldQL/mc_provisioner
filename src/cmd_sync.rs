@@ -8,38 +8,27 @@ use tracing::{info, warn};
 use crate::config::GlobalArgs;
 use crate::utils;
 
-pub fn sync_plugins(global_args: GlobalArgs, clear: bool) -> Result<()> {
-    let plugins_dir = PathBuf::from("plugins");
-    let plugins_exists = plugins_dir.as_path().exists();
-
-    if !plugins_exists && !clear {
-        warn!("plugins directory does not exist, skipping...");
-        return Ok(());
-    } else if !plugins_exists && clear {
-        warn!("plugins directory does not exist, no syncing will occur");
-    }
-
-    let options = {
-        let mut options = CopyOptions::new();
-        options.overwrite = true;
-
-        options
-    };
-
+pub fn sync(global_args: GlobalArgs, clear_plugins: bool) -> Result<()> {
     let server_iter = utils::server_iter(
         global_args.server_count,
         global_args.start_port,
         &global_args.directory_template,
     );
 
+    let options = {
+        let mut options = CopyOptions::new();
+        options.overwrite = true;
+        options.copy_inside = false;
+        options.content_only = true;
+
+        options
+    };
+
     for (_, _, directory, _) in server_iter {
         let name = directory.to_str().unwrap();
-        if !directory.exists() {
-            warn!("directory for server {} does not exist, skipping...", &name);
-            continue;
-        }
 
-        if clear {
+        // Clear plugins dir
+        if clear_plugins {
             let server_plugins_dir = directory.join("plugins");
             if !server_plugins_dir.exists() {
                 continue;
@@ -66,9 +55,29 @@ pub fn sync_plugins(global_args: GlobalArgs, clear: bool) -> Result<()> {
             }
         }
 
-        if plugins_exists {
-            info!("syncing plugins to server: {}", &name);
-            dir::copy(&plugins_dir, directory, &options)?;
+        // Sync dirs
+        for source_dir in &global_args.sync_dirs {
+            if !source_dir.exists() {
+                warn!("directory {:?} does not exist, skipping sync", source_dir);
+                continue;
+            }
+
+            if !source_dir.is_dir() {
+                warn!("{:?} is not a directory, skipping sync", source_dir);
+                continue;
+            }
+
+            let is_plugins_dir = match source_dir.file_name() {
+                Some(dir) => dir == "plugins",
+                _ => false,
+            };
+
+            let target_dir = match is_plugins_dir {
+                true => directory.join("plugins"),
+                false => directory.clone(),
+            };
+
+            dir::copy(&source_dir, &target_dir, &options)?;
         }
     }
 

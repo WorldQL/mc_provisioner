@@ -11,7 +11,7 @@ mod cmd_init;
 mod cmd_remove;
 mod cmd_reset_world;
 mod cmd_start_stop;
-mod cmd_sync_plugins;
+mod cmd_sync;
 mod cmd_update_server;
 mod config;
 mod server_jar;
@@ -92,11 +92,11 @@ enum Command {
         server_properties: Vec<ServerProperty>,
     },
 
-    #[clap(about = "Sync plugins directory to all servers")]
-    SyncPlugins {
+    #[clap(about = "Sync specified directories to all servers")]
+    Sync {
         /// Clears plugins directory before syncing [default: false]
         #[clap(short = 'c', long)]
-        clear: bool,
+        clear_plugins: bool,
     },
 
     #[clap(about = "Update server .jar to the latest build for a given version")]
@@ -199,7 +199,7 @@ fn main() -> Result<()> {
             cmd_init::init(global_args, init_args)?
         }
 
-        Command::SyncPlugins { clear } => cmd_sync_plugins::sync_plugins(global_args, clear)?,
+        Command::Sync { clear_plugins } => cmd_sync::sync(global_args, clear_plugins)?,
 
         Command::UpdateServer => cmd_update_server::update_server(global_args)?,
 
