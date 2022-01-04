@@ -1,24 +1,14 @@
 use std::fs;
-use std::path::PathBuf;
 
 use color_eyre::Result;
-use tracing::info;
+use fs_extra::dir::{self, CopyOptions};
+use tracing::{info, warn};
 
 use crate::config::{GlobalArgs, InitArgs};
 use crate::utils;
 
 pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
     let server_jar = global_args.jar_type.download(&global_args.jar_version)?;
-
-    let plugins_dir = PathBuf::from("plugins");
-    let bukkit_yml = PathBuf::from("bukkit.yml");
-    let spigot_yml = PathBuf::from("spigot.yml");
-    let paper_yml = PathBuf::from("paper.yml");
-
-    let plugins_exists = plugins_dir.as_path().exists();
-    let bukkit_exists = bukkit_yml.as_path().exists();
-    let spigot_exists = spigot_yml.as_path().exists();
-    let paper_exists = paper_yml.as_path().exists();
 
     let has_ops = !args.ops.is_empty();
     let ops = args
@@ -45,6 +35,15 @@ pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
         global_args.start_port,
         &global_args.directory_template,
     );
+
+    let options = {
+        let mut options = CopyOptions::new();
+        options.overwrite = true;
+        options.copy_inside = false;
+        options.content_only = true;
+
+        options
+    };
 
     for (_, port, directory, motd) in server_iter {
         info!("creating server: {:?}", &directory);
@@ -73,20 +72,28 @@ pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
 
         fs::write(directory.join("server.properties"), properties)?;
 
-        if !args.skip_plugins && plugins_exists {
-            copy_dir::copy_dir(&plugins_dir, directory.join(&plugins_dir))?;
-        }
+        for source_dir in &global_args.sync_dirs {
+            if !source_dir.exists() {
+                warn!("directory {:?} does not exist, skipping sync", source_dir);
+                continue;
+            }
 
-        if !args.no_copy_bukkit && bukkit_exists {
-            fs::copy(&bukkit_yml, directory.join(&bukkit_yml))?;
-        }
+            if !source_dir.is_dir() {
+                warn!("{:?} is not a directory, skipping sync", source_dir);
+                continue;
+            }
 
-        if !args.no_copy_spigot && spigot_exists {
-            fs::copy(&spigot_yml, directory.join(&spigot_yml))?;
-        }
+            let is_plugins_dir = match source_dir.file_name() {
+                Some(dir) => dir == "plugins",
+                _ => false,
+            };
 
-        if !args.no_copy_paper && paper_exists {
-            fs::copy(&paper_yml, directory.join(&paper_yml))?;
+            let target_dir = match is_plugins_dir {
+                true => directory.join("plugins"),
+                false => directory.clone(),
+            };
+
+            dir::copy(&source_dir, &target_dir, &options)?;
         }
     }
 

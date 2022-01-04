@@ -22,6 +22,7 @@ pub struct GlobalConfig {
     server_count: Option<u8>,
     start_port: Option<u16>,
     directory_template: Option<String>,
+    sync_dirs: Option<Vec<PathBuf>>,
     timeout_secs: Option<u8>,
 }
 
@@ -30,10 +31,6 @@ pub struct InitConfig {
     level_seed: Option<String>,
     ops: Option<Vec<String>>,
     white_list: Option<Vec<String>>,
-    skip_plugins: Option<bool>,
-    no_copy_bukkit: Option<bool>,
-    no_copy_spigot: Option<bool>,
-    no_copy_paper: Option<bool>,
     server_properties: Option<BTreeMap<String, String>>,
 }
 
@@ -65,10 +62,19 @@ pub struct GlobalArgs {
     pub server_count: u8,
     pub start_port: u16,
     pub directory_template: String,
+    pub sync_dirs: Vec<PathBuf>,
     pub timeout_secs: u8,
 }
 
 pub fn global_args(config: GlobalConfig, args: Args) -> GlobalArgs {
+    let sync_dirs = if args.sync_dirs.is_empty() {
+        config
+            .sync_dirs
+            .unwrap_or_else(|| vec![PathBuf::from("./plugins")])
+    } else {
+        args.sync_dirs
+    };
+
     GlobalArgs {
         jar_type: args.jar_type.or(config.jar_type).unwrap_or_default(),
         jar_version: args.jar_version.or(config.jar_version).unwrap_or_default(),
@@ -78,6 +84,7 @@ pub fn global_args(config: GlobalConfig, args: Args) -> GlobalArgs {
             .directory_template
             .or(config.directory_template)
             .unwrap_or_else(|| "Mammoth Server".into()),
+        sync_dirs,
         timeout_secs: args.timeout_secs.or(config.timeout_secs).unwrap_or(10),
     }
 }
@@ -87,10 +94,6 @@ pub struct InitArgs {
     pub level_seed: String,
     pub ops: HashSet<String>,
     pub white_list: HashSet<String>,
-    pub skip_plugins: bool,
-    pub no_copy_bukkit: bool,
-    pub no_copy_spigot: bool,
-    pub no_copy_paper: bool,
     pub server_properties: Vec<ServerProperty>,
 }
 
@@ -100,10 +103,6 @@ pub fn init_args(
     level_seed: Option<String>,
     mut ops: Vec<String>,
     mut white_list: Vec<String>,
-    skip_plugins: Option<bool>,
-    no_copy_bukkit: Option<bool>,
-    no_copy_spigot: Option<bool>,
-    no_copy_paper: Option<bool>,
     server_properties: Vec<ServerProperty>,
 ) -> Result<InitArgs> {
     let ops = {
@@ -146,10 +145,6 @@ pub fn init_args(
         level_seed: level_seed.or(config.level_seed).unwrap_or_default(),
         ops,
         white_list,
-        skip_plugins: skip_plugins.or(config.skip_plugins).unwrap_or_default(),
-        no_copy_bukkit: no_copy_bukkit.or(config.no_copy_bukkit).unwrap_or_default(),
-        no_copy_spigot: no_copy_spigot.or(config.no_copy_spigot).unwrap_or_default(),
-        no_copy_paper: no_copy_paper.or(config.no_copy_paper).unwrap_or_default(),
         server_properties: arg_types::map_to_properties(server_properties)?,
     };
 

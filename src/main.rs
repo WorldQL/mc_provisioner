@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use arg_types::{JarType, ServerMemory, ServerProperty};
 use clap::{IntoApp, Parser, ValueHint};
 use clap_complete::Shell;
@@ -38,6 +40,12 @@ pub struct Args {
     #[clap(short, long, value_hint = ValueHint::Other)]
     directory_template: Option<String>,
 
+    /// Directories to sync to all instances [default: ["plugins"]]
+    /// Any directory named "plugins" will sync to each server's plugins directory
+    /// Other directories will sync to each server's root directory
+    #[clap(long = "sync-dir", multiple_occurrences = true, multiple_values = false, value_hint = ValueHint::DirPath)]
+    sync_dirs: Vec<PathBuf>,
+
     /// Graceful stop / restart timeout seconds [default: 10]
     #[clap(short, long, value_hint = ValueHint::Other)]
     timeout_secs: Option<u8>,
@@ -72,22 +80,6 @@ enum Command {
             multiple_values = false, value_hint = ValueHint::Other
         )]
         white_list: Vec<String>,
-
-        /// Don't copy Plugins directory
-        #[clap(short, long, value_hint = ValueHint::Other)]
-        skip_plugins: Option<bool>,
-
-        /// Don't copy bukkit.yml
-        #[clap(long)]
-        no_copy_bukkit: Option<bool>,
-
-        /// Don't copy spigot.yml
-        #[clap(long)]
-        no_copy_spigot: Option<bool>,
-
-        /// Don't copy paper.yml
-        #[clap(long)]
-        no_copy_paper: Option<bool>,
 
         /// Additional server properties
         #[clap(
@@ -183,10 +175,6 @@ fn main() -> Result<()> {
             level_seed,
             ops,
             white_list,
-            skip_plugins,
-            no_copy_bukkit,
-            no_copy_spigot,
-            no_copy_paper,
             server_properties,
         } => {
             let init_args = config::init_args(
@@ -194,10 +182,6 @@ fn main() -> Result<()> {
                 level_seed,
                 ops,
                 white_list,
-                skip_plugins,
-                no_copy_bukkit,
-                no_copy_spigot,
-                no_copy_paper,
                 server_properties,
             );
 
