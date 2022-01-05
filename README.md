@@ -4,13 +4,20 @@
 ## Overview
 Provisioner is a tool designed to make the creation of Mammoth clusters a breeze.  
 It is designed to automate the following:
-* Downloading and installing the latest version of Paper for your desired Minecraft version.
+* Downloading and installing the latest version of Paper (and supported forks) for your desired Minecraft version.
 * Setting up `server.properties` for each server.
 * Copying Plugins and other arbitrary config files to each server.
 * Starting and stopping each provisioned server, running each in the background.
 * **And more...**
 
 ## User Guide
+### Quickstart
+1. Download the latest `provisioner` binary from [GitHub Releases](https://github.com/WorldQL/mc_provisioner/releases).  
+  Either save it to a directory where you will be managing your servers, or add it to your PATH for global access.
+2. *__Optional__: Copy a `plugins` directory into the directory where you will be managing the servers.*
+3. Create and fill out a `provisioner.toml` config file for ease of use.
+4. Run `./provisioner init` to create your servers and then `./provisioner start` to run them all in the background.
+
 ### Commands and Flags
 | Command | Run | Usage |
 | - | - | - |
@@ -34,14 +41,18 @@ Most config properties have a default value, and any CLI flags will always take 
 #### Example Configuration
 ```toml
 [global]
+# Server .jar type and game version
 jar_type = "paper"
 jar_version = "1.18.1"
+# Server Config
 server_count = 3
 start_port = 25565
 directory_template = "Mammoth Server"
+# Directories to sync
 sync_dirs = ["./plugins"]
 
 [init]
+# Initial server config
 level_seed = "mammoth"
 ops = ["Steve", "Alex"]
 # ... white_list ...
@@ -55,14 +66,23 @@ difficulty = "peaceful"
 online-mode = "false"
 ```
 
-This will configure 3 servers with ports 25565 to 25567
+This will configure 3 servers using Paper with ports 25565 to 25567.
 
-### Getting Started
-1. Download the latest `provisioner` binary from [GitHub Actions](https://github.com/WorldQL/mc_provisioner/actions/workflows/build.yml). **Be sure to only download binaries for tagged builds.**  
-  Either save it to a directory where you will be managing your servers, or add it to your PATH for global access.
-2. *__Optional__: Copy `bukkit.yml`, `spigot.yml`, `paper.yml`, and/or a `plugins` directory into the directory where you will be managing the servers.*
-3. Create and fill out a `provisioner.toml` config file for ease of use.
-4. Run `./provisioner init` to create your servers and then `./provisioner start` to run them all in the background.
+### Syncing Files to each Server
+Provisioner supports syncing files to each server, with the `--sync-dir` flag which can be repeated, or the `sync_dirs = []` config option. By default, Provisioner will sync the `./plugins` directory relative to the directory where you are using the command. Specifying your own directories will overwrite the default, so be sure to include `./plugins` in your config if you wish to keep using that directory.
+
+The file tree inside each specified directory will be copied into each server's root. For example, if you specify `./config` as a sync directory and a file at `./config/bukkit.yml` inside, `bukkit.yml` will be copied into the server and be used as Bukkit config.
+
+The exception to this is any directory named `plugins`. This will directly sync into each server's plugins directory, and supports a clean sync. Running `./provisioner sync --clear-plugins` will remove any top-level `.jar` files in each server's plugins directory before syncing.
+
+### Alternate Server .jar Files
+By default Provisioner will download and use [Paper](https://papermc.io/) server .jar files. If you wish to use an alternate server .jar file, you can use the `--jar-type` global flag to specify an alternate .jar type.
+
+**Currently supported server .jar files:**
+* `paper`
+* [`pufferfish`](https://github.com/pufferfish-gg/Pufferfish)
+
+Using the `--jar-version` flag or `jar_version` config option, Provisioner will query the build API of the selected jar type and download the latest available build for the specified version. **Please note that not all jar types follow the same versioning scheme for game versions.**
 
 ### Use in Mammoth Development
 To make your life a lot easier when developing [Mammoth](https://github.com/WorldQL/mammoth), we recommend setting up a symlink from your development directory to the provisioner plugins template directory.
