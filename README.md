@@ -15,8 +15,9 @@ It is designed to automate the following:
 1. Download the latest `provisioner` binary from [GitHub Releases](https://github.com/WorldQL/mc_provisioner/releases).  
   Either save it to a directory where you will be managing your servers, or add it to your PATH for global access.
 2. *__Optional__: Copy a `plugins` directory into the directory where you will be managing the servers.*
-3. Create and fill out a `provisioner.toml` config file for ease of use.
-4. Run `./provisioner init` to create your servers and then `./provisioner start` to run them all in the background.
+3. *__Optional__: Create a `config` directory for non-plugin configuration files you want to copy*. (bukkit.yml, paper.yml, pufferfish.yml, etc.)
+4. Create and fill out a `provisioner.toml` config file for ease of use.
+5. Run `./provisioner init` to create your servers and then `./provisioner start` to run them all in the background.
 
 ### Commands and Flags
 | Command | Run | Usage |
