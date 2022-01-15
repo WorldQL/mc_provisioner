@@ -12,6 +12,7 @@ It is designed to automate the following:
 
 ## User Guide
 ### Quickstart
+0. Make sure you have `tmux` installed. You can usually install this using your distro's package manager.
 1. Download the latest `provisioner` binary from [GitHub Releases](https://github.com/WorldQL/mc_provisioner/releases).  
   Either save it to a directory where you will be managing your servers, or add it to your PATH for global access.
 2. *__Optional__: Copy a `plugins` directory into the directory where you will be managing the servers.*
