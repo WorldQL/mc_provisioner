@@ -182,18 +182,38 @@ enum Command {
 
     #[clap(about = "Merge all world region files into a single folder")]
     Combine {
+        #[clap(short = 'd', long)]
         world_diameter: Option<u32>,
+
+        #[clap(short = 'W', long)]
         slice_width: Option<u32>,
+
+        #[clap(long)]
         avoid_slicing_origin: Option<bool>,
+
+        #[clap(short = 'r', long)]
         origin_radius: Option<u32>,
+
+        #[clap(short = 'C', long)]
+        combined_directory: Option<PathBuf>,
     },
 
     #[clap(about = "Remove irrelevant world files from each server")]
     Prune {
+        #[clap(short = 'd', long)]
         world_diameter: Option<u32>,
+
+        #[clap(short = 'W', long)]
         slice_width: Option<u32>,
+
+        #[clap(long)]
         avoid_slicing_origin: Option<bool>,
+
+        #[clap(short = 'r', long)]
         origin_radius: Option<u32>,
+
+        #[clap(short = 'C', long)]
+        combined_directory: Option<PathBuf>,
     },
 
     #[clap(about = "Generate shell completions")]
@@ -299,6 +319,7 @@ fn main() -> Result<()> {
             slice_width,
             avoid_slicing_origin,
             origin_radius,
+            combined_directory,
         } => {
             let world_management_args = config::world_management_args(
                 config.world_management.unwrap_or_default(),
@@ -306,6 +327,7 @@ fn main() -> Result<()> {
                 slice_width,
                 avoid_slicing_origin,
                 origin_radius,
+                combined_directory,
             );
 
             cmd_combine_prune::combine(global_args, world_management_args)?
@@ -316,6 +338,7 @@ fn main() -> Result<()> {
             slice_width,
             avoid_slicing_origin,
             origin_radius,
+            combined_directory,
         } => {
             let world_management_args = config::world_management_args(
                 config.world_management.unwrap_or_default(),
@@ -323,6 +346,7 @@ fn main() -> Result<()> {
                 slice_width,
                 avoid_slicing_origin,
                 origin_radius,
+                combined_directory,
             );
 
             cmd_combine_prune::prune(global_args, world_management_args)?

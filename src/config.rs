@@ -49,6 +49,7 @@ pub struct WorldManagementConfig {
     pub slice_width: Option<u32>,
     pub avoid_slicing_origin: Option<bool>,
     pub origin_radius: Option<u32>,
+    pub combined_directory: Option<PathBuf>,
 }
 
 pub fn read_config() -> Result<Config> {
@@ -193,6 +194,7 @@ pub struct WorldManagementArgs {
     pub slice_width: Option<u32>,
     pub avoid_slicing_origin: Option<bool>,
     pub origin_radius: Option<u32>,
+    pub combined_directory: PathBuf,
 }
 
 pub fn world_management_args(
@@ -201,12 +203,14 @@ pub fn world_management_args(
     slice_width: Option<u32>,
     avoid_slicing_origin: Option<bool>,
     origin_radius: Option<u32>,
+    combined_directory: Option<PathBuf>,
 ) -> WorldManagementArgs {
     WorldManagementArgs {
         world_diameter: world_diameter.or(config.world_diameter),
         slice_width: slice_width.or(config.slice_width),
         avoid_slicing_origin: avoid_slicing_origin.or(config.avoid_slicing_origin),
         origin_radius: origin_radius.or(config.origin_radius),
+        combined_directory: combined_directory.or(config.combined_directory).unwrap_or_else(|| "".into())
     }
 }
 // endregion
