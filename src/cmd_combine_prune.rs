@@ -1,4 +1,6 @@
 use color_eyre::Result;
+use once_cell::sync::Lazy;
+use regex::Regex;
 use tracing::error;
 
 use crate::config::{GlobalArgs, WorldManagementArgs};
@@ -130,5 +132,58 @@ fn get_owner_of_location(args: &CheckedArgs, server_count: u8, coords: Coords) -
     let owner = position % i64::from(server_count);
 
     owner as u8
+}
+// endregion
+
+// region: Region Functions
+fn min_block_from_chunk(coords: Coords) -> Coords {
+    Coords {
+        x: coords.x << 4,
+        z: coords.z << 4,
+    }
+}
+
+fn max_block_from_chunk(coords: Coords) -> Coords {
+    Coords {
+        x: (coords.x + 1 << 4) - 1,
+        z: (coords.z + 1 << 4) - 1,
+    }
+}
+
+fn min_chunk_from_region(coords: Coords) -> Coords {
+    Coords {
+        x: coords.x << 5,
+        z: coords.z << 5,
+    }
+}
+
+fn max_chunk_from_region(coords: Coords) -> Coords {
+    Coords {
+        x: (coords.x + 1 << 5) - 1,
+        z: (coords.z + 1 << 5) - 1,
+    }
+}
+
+fn min_block_from_region(coords: Coords) -> Coords {
+    min_block_from_chunk(min_chunk_from_region(coords))
+}
+
+fn max_block_from_region(coords: Coords) -> Coords {
+    max_block_from_chunk(max_chunk_from_region(coords))
+}
+
+#[rustfmt::skip]
+static REGION_RX: Lazy<Regex> = Lazy::new(|| Regex::new(r"^\s*r\.(-?\d+)\.(-?\d+)\.mca\s*$").unwrap());
+
+fn parse_coords(string: &str) -> Option<Coords> {
+    let captures = REGION_RX.captures(string)?;
+
+    let x = captures.get(1)?.as_str();
+    let z = captures.get(2)?.as_str();
+
+    let x = x.parse::<i64>().ok()?;
+    let z = z.parse::<i64>().ok()?;
+
+    Some(Coords { x, z })
 }
 // endregion
