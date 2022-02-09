@@ -7,6 +7,7 @@ use color_eyre::Result;
 use tracing::{error, warn};
 
 mod arg_types;
+mod cmd_combine_prune;
 mod cmd_init;
 mod cmd_remove;
 mod cmd_reset_world;
@@ -141,6 +142,22 @@ enum Command {
         jvm_args: Option<String>,
     },
 
+    #[clap(about = "Merge all world region files into a single folder")]
+    Combine {
+        world_diameter: Option<u32>,
+        slice_width: Option<u32>,
+        avoid_slicing_origin: Option<bool>,
+        origin_radius: Option<u32>,
+    },
+
+    #[clap(about = "Remove irrelevant world files from each server")]
+    Prune {
+        world_diameter: Option<u32>,
+        slice_width: Option<u32>,
+        avoid_slicing_origin: Option<bool>,
+        origin_radius: Option<u32>,
+    },
+
     #[clap(about = "Generate shell completions")]
     Completions {
         /// CLI shell type
@@ -218,6 +235,7 @@ fn main() -> Result<()> {
                 use_aikar_flags,
                 jvm_args,
             );
+
             cmd_start_stop::start(global_args, start_args)?
         }
 
@@ -234,7 +252,42 @@ fn main() -> Result<()> {
                 use_aikar_flags,
                 jvm_args,
             );
+
             cmd_start_stop::restart(global_args, start_args)?
+        }
+
+        Command::Combine {
+            world_diameter,
+            slice_width,
+            avoid_slicing_origin,
+            origin_radius,
+        } => {
+            let world_management_args = config::world_management_args(
+                config.world_management.unwrap_or_default(),
+                world_diameter,
+                slice_width,
+                avoid_slicing_origin,
+                origin_radius,
+            );
+
+            cmd_combine_prune::combine(global_args, world_management_args)?
+        }
+
+        Command::Prune {
+            world_diameter,
+            slice_width,
+            avoid_slicing_origin,
+            origin_radius,
+        } => {
+            let world_management_args = config::world_management_args(
+                config.world_management.unwrap_or_default(),
+                world_diameter,
+                slice_width,
+                avoid_slicing_origin,
+                origin_radius,
+            );
+
+            cmd_combine_prune::prune(global_args, world_management_args)?
         }
 
         Command::Completions { shell } => {

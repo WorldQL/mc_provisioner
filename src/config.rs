@@ -13,6 +13,7 @@ pub struct Config {
     pub global: Option<GlobalConfig>,
     pub init: Option<InitConfig>,
     pub start: Option<StartConfig>,
+    pub world_management: Option<WorldManagementConfig>,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -39,6 +40,14 @@ pub struct StartConfig {
     max_memory: Option<ServerMemory>,
     use_aikar_flags: Option<bool>,
     jvm_args: Option<String>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+pub struct WorldManagementConfig {
+    pub world_diameter: Option<u32>,
+    pub slice_width: Option<u32>,
+    pub avoid_slicing_origin: Option<bool>,
+    pub origin_radius: Option<u32>,
 }
 
 pub fn read_config() -> Result<Config> {
@@ -170,6 +179,28 @@ pub fn start_args(
             .unwrap_or_else(|| "1G".into()),
         use_aikar_flags: use_aikar_flags.or(config.use_aikar_flags).unwrap_or(false),
         jvm_args: jvm_args.or(config.jvm_args),
+    }
+}
+
+pub struct WorldManagementArgs {
+    pub world_diameter: Option<u32>,
+    pub slice_width: Option<u32>,
+    pub avoid_slicing_origin: Option<bool>,
+    pub origin_radius: Option<u32>,
+}
+
+pub fn world_management_args(
+    config: WorldManagementConfig,
+    world_diameter: Option<u32>,
+    slice_width: Option<u32>,
+    avoid_slicing_origin: Option<bool>,
+    origin_radius: Option<u32>,
+) -> WorldManagementArgs {
+    WorldManagementArgs {
+        world_diameter: world_diameter.or(config.world_diameter),
+        slice_width: slice_width.or(config.slice_width),
+        avoid_slicing_origin: avoid_slicing_origin.or(config.avoid_slicing_origin),
+        origin_radius: origin_radius.or(config.origin_radius),
     }
 }
 // endregion
