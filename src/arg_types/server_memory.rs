@@ -72,7 +72,7 @@ impl FromStr for ServerMemory {
         let parsed = number.parse::<u64>()?;
         let value = parsed * multi;
 
-        let mem = ServerMemory(memory.to_string(), value);
+        let mem = ServerMemory(memory.to_owned(), value);
         Ok(mem)
     }
 }

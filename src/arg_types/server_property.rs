@@ -23,8 +23,8 @@ impl FromStr for ServerProperty {
             return Err(ServerPropertyError::InvalidProperty);
         }
 
-        let first = split.get(0).unwrap().to_string();
-        let second = split.get(1).unwrap().to_string();
+        let first = (*split.get(0).unwrap()).to_owned();
+        let second = (*split.get(1).unwrap()).to_owned();
 
         let reserved = vec![
             "level-seed",

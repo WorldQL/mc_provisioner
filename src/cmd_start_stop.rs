@@ -121,7 +121,7 @@ pub fn stop(global_args: GlobalArgs) -> Result<()> {
         };
 
         // After N seconds, timeout and kill anyway
-        let wait_duration = Duration::from_secs(global_args.timeout_secs as u64);
+        let wait_duration = Duration::from_secs(u64::from(global_args.timeout_secs));
         match child.wait_timeout(wait_duration) {
             Err(_) => {
                 error!("failed to stop \"{}\"", &name);
@@ -171,7 +171,7 @@ pub fn restart(global_args: GlobalArgs, args: StartArgs) -> Result<()> {
         };
 
         // After N seconds, timeout and restart anyway
-        let wait_duration = Duration::from_secs(global_args.timeout_secs as u64);
+        let wait_duration = Duration::from_secs(u64::from(global_args.timeout_secs));
         match child.wait_timeout(wait_duration) {
             Err(_) => {
                 error!("failed to stop \"{}\"", &name);

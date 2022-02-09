@@ -168,7 +168,7 @@ struct Coords {
 
 // region: Slice Functions
 fn in_unsliced_origin(args: &CheckedArgs, coords: Coords) -> bool {
-    if args.avoid_slicing_origin == false {
+    if !args.avoid_slicing_origin {
         return false;
     }
 
@@ -209,8 +209,8 @@ fn min_block_from_chunk(coords: Coords) -> Coords {
 
 fn max_block_from_chunk(coords: Coords) -> Coords {
     Coords {
-        x: (coords.x + 1 << 4) - 1,
-        z: (coords.z + 1 << 4) - 1,
+        x: ((coords.x + 1) << 4) - 1,
+        z: ((coords.z + 1) << 4) - 1,
     }
 }
 
@@ -223,8 +223,8 @@ fn min_chunk_from_region(coords: Coords) -> Coords {
 
 fn max_chunk_from_region(coords: Coords) -> Coords {
     Coords {
-        x: (coords.x + 1 << 5) - 1,
-        z: (coords.z + 1 << 5) - 1,
+        x: ((coords.x + 1) << 5) - 1,
+        z: ((coords.z + 1) << 5) - 1,
     }
 }
 

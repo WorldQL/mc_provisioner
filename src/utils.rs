@@ -8,7 +8,7 @@ pub fn server_iter(
     directory_template: &str,
 ) -> impl Iterator<Item = ServerInfo> + '_ {
     (1..=server_count).into_iter().map(move |idx| {
-        let port = start_port + (idx as u16 - 1);
+        let port = start_port + (u16::from(idx) - 1);
         let motd = format!("{} {}", directory_template, idx);
 
         let directory = format!("{}_{}", directory_template, port);

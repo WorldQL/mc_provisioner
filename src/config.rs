@@ -94,7 +94,7 @@ pub fn global_args(config: GlobalConfig, args: Args) -> GlobalArgs {
         level_name: args
             .level_name
             .or(config.level_name)
-            .unwrap_or("world".into()),
+            .unwrap_or_else(|| "world".into()),
         directory_template: args
             .directory_template
             .or(config.directory_template)
