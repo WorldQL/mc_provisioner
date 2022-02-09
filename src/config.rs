@@ -210,7 +210,9 @@ pub fn world_management_args(
         slice_width: slice_width.or(config.slice_width),
         avoid_slicing_origin: avoid_slicing_origin.or(config.avoid_slicing_origin),
         origin_radius: origin_radius.or(config.origin_radius),
-        combined_directory: combined_directory.or(config.combined_directory).unwrap_or_else(|| "".into())
+        combined_directory: combined_directory
+            .or(config.combined_directory)
+            .unwrap_or_else(|| "combined_world".into()),
     }
 }
 // endregion
