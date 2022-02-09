@@ -30,7 +30,9 @@ It is designed to automate the following:
 | Remove | `./provisioner remove` | Remove all server directories. |
 | Start | `./provisioner start` | Start all servers in the background. |
 | Stop | `./provisioner stop` | Stop each background server process. |
-| Restart  | `./provisioner restart` | Restart all servers. |
+| Restart | `./provisioner restart` | Restart all servers. |
+| Combine | `./provisioner combine` | Merge all world region files into a single folder. |
+| Prune | `./provisioner prune` | Remove irrelevant world files from each server. |
 | Completions | `./provisioner completions` | Generate shell completions. |
 
 You can also run `./provisioner help <command>` to list each commands' available flags.
