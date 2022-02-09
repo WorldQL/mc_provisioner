@@ -22,6 +22,7 @@ pub struct GlobalConfig {
     jar_version: Option<String>,
     server_count: Option<u8>,
     start_port: Option<u16>,
+    level_name: Option<String>,
     directory_template: Option<String>,
     sync_dirs: Option<Vec<PathBuf>>,
     timeout_secs: Option<u8>,
@@ -70,6 +71,7 @@ pub struct GlobalArgs {
     pub jar_version: String,
     pub server_count: u8,
     pub start_port: u16,
+    pub level_name: String,
     pub directory_template: String,
     pub sync_dirs: Vec<PathBuf>,
     pub timeout_secs: u8,
@@ -89,6 +91,10 @@ pub fn global_args(config: GlobalConfig, args: Args) -> GlobalArgs {
         jar_version: args.jar_version.or(config.jar_version).unwrap_or_default(),
         server_count: args.server_count.or(config.server_count).unwrap_or(2),
         start_port: args.start_port.or(config.start_port).unwrap_or(25565),
+        level_name: args
+            .level_name
+            .or(config.level_name)
+            .unwrap_or("world".into()),
         directory_template: args
             .directory_template
             .or(config.directory_template)

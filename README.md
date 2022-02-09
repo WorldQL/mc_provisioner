@@ -51,6 +51,7 @@ jar_version = "1.18.1"
 # Server Config
 server_count = 3
 start_port = 25565
+level_name = "world"
 directory_template = "Mammoth Server"
 # Directories to sync
 sync_dirs = ["./plugins"]

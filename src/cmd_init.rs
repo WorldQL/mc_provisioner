@@ -66,8 +66,8 @@ pub fn init(global_args: GlobalArgs, args: InitArgs) -> Result<()> {
         }
 
         let properties = format!(
-            "level-seed={}\nmotd={}\nquery.port={}\nserver-port={}\n{}",
-            &args.level_seed, motd, port, port, &extra_props
+            "level-seed={}\nmotd={}\nquery.port={}\nserver-port={}\nlevel-name={}\n{}",
+            &args.level_seed, motd, port, port, &global_args.level_name, &extra_props
         );
 
         fs::write(directory.join("server.properties"), properties)?;

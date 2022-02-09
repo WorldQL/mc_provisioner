@@ -37,6 +37,10 @@ pub struct Args {
     #[clap(short = 'p', long, value_hint = ValueHint::Other)]
     start_port: Option<u16>,
 
+    /// Level name [default: "world"]
+    #[clap(short = 'w', long, value_hint = ValueHint::Other)]
+    level_name: Option<String>,
+
     /// Directory template, appends server port [default: "Mammoth Server"]
     #[clap(short, long, value_hint = ValueHint::Other)]
     directory_template: Option<String>,
