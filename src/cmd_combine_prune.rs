@@ -94,34 +94,40 @@ fn check_args(args: WorldManagementArgs) -> CheckedArgs {
 }
 // endregion
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Coords {
+    pub x: i64,
+    pub z: i64,
+}
+
 // region: Slice Functions
-fn in_unsliced_origin(args: &CheckedArgs, x: f64, z: f64) -> bool {
+fn in_unsliced_origin(args: &CheckedArgs, coords: Coords) -> bool {
     if args.avoid_slicing_origin == false {
         return false;
     }
 
-    let r = f64::from(args.origin_radius);
-    let x = x.abs();
-    let z = z.abs();
+    let r = i64::from(args.origin_radius);
+    let x = coords.x.abs();
+    let z = coords.z.abs();
 
     x < r && z < r
 }
 
-fn get_owner_of_location(args: &CheckedArgs, server_count: u8, x: f64, z: f64) -> u8 {
-    if in_unsliced_origin(args, x, z) {
+fn get_owner_of_location(args: &CheckedArgs, server_count: u8, coords: Coords) -> u8 {
+    if in_unsliced_origin(args, coords) {
         return 0;
     }
 
-    let slices_per_row = f64::from(args.world_diameter / args.slice_width);
-    let adjusted_x = x + f64::from(args.world_diameter / 2);
-    let adjusted_z = z + f64::from(args.world_diameter / 2);
+    let slices_per_row = i64::from(args.world_diameter / args.slice_width);
+    let adjusted_x = coords.x + i64::from(args.world_diameter / 2);
+    let adjusted_z = coords.z + i64::from(args.world_diameter / 2);
 
-    let slice_width = f64::from(args.slice_width);
+    let slice_width = i64::from(args.slice_width);
     let slice_x = adjusted_x / slice_width;
     let slice_z = adjusted_z / slice_width;
 
     let position = slice_x + (slice_z * slices_per_row);
-    let owner = position % f64::from(server_count);
+    let owner = position % i64::from(server_count);
 
     owner as u8
 }
