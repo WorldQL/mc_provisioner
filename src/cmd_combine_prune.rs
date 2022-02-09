@@ -1,16 +1,80 @@
+use std::fs;
+
 use color_eyre::Result;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use tracing::error;
+use tracing::{error, warn};
 
 use crate::config::{GlobalArgs, WorldManagementArgs};
+use crate::utils;
 
 // region: Commands
 pub fn combine(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()> {
     let args = check_args(args);
-    dbg!(&args);
 
-    todo!()
+    let server_iter = utils::server_iter(
+        global_args.server_count,
+        global_args.start_port,
+        &global_args.directory_template,
+    );
+
+    for (idx, port, directory, motd) in server_iter {
+        // Region owners are 0-indexed
+        let idx = idx - 1;
+
+        let world_dir = directory.join(&global_args.level_name);
+        let region_dir = world_dir.join("region");
+
+        if !region_dir.exists() {
+            warn!("directory {:?} does not exist, skipping sync", region_dir);
+            continue;
+        }
+
+        for entry in fs::read_dir(region_dir)? {
+            let entry = entry?;
+            if !entry.file_type()?.is_file() {
+                continue;
+            }
+
+            let path = entry.path();
+            match path.extension() {
+                None => continue,
+                Some(extension) => {
+                    if extension != "mca" {
+                        continue;
+                    }
+                }
+            }
+
+            let filename = path.file_name().unwrap().to_string_lossy();
+            let region_coords = match parse_coords(&filename) {
+                Some(coords) => coords,
+
+                None => {
+                    tracing::warn!("invalid region file name: {:?}", path);
+                    continue;
+                }
+            };
+
+            let block_coords = min_block_from_region(region_coords);
+            let owner = get_owner_of_location(&args, global_args.server_count, block_coords);
+
+            // Negative owned regions are outside of the world area
+            if owner < 0 {
+                continue;
+            }
+
+            // Only copy regions this server owns
+            let owner = owner as u8;
+            if owner != idx {
+                continue;
+            }
+
+            todo!();
+        }
+    }
+
+    Ok(())
 }
 
 pub fn prune(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()> {
@@ -115,7 +179,7 @@ fn in_unsliced_origin(args: &CheckedArgs, coords: Coords) -> bool {
     x < r && z < r
 }
 
-fn get_owner_of_location(args: &CheckedArgs, server_count: u8, coords: Coords) -> u8 {
+fn get_owner_of_location(args: &CheckedArgs, server_count: u8, coords: Coords) -> i16 {
     if in_unsliced_origin(args, coords) {
         return 0;
     }
@@ -131,7 +195,7 @@ fn get_owner_of_location(args: &CheckedArgs, server_count: u8, coords: Coords) -
     let position = slice_x + (slice_z * slices_per_row);
     let owner = position % i64::from(server_count);
 
-    owner as u8
+    owner as i16
 }
 // endregion
 
