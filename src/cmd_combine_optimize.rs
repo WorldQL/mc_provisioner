@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use color_eyre::Result;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use tracing::{error, warn};
+use tracing::{error, info, warn};
 
 use crate::config::{GlobalArgs, WorldManagementArgs};
 use crate::utils;
@@ -32,33 +32,37 @@ pub fn combine(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()>
     );
 
     for (idx, _, directory, _) in server_iter {
+        let name = directory.to_str().unwrap();
+
         // Region owners are 0-indexed
         let idx = idx - 1;
         let world_dir = directory.join(&global_args.level_name);
 
         // Copy level.dat from first server
-        if idx == 1 {
+        if idx == 0 {
             let level_dat_source = world_dir.join("level.dat");
             let level_dat_dest = args.combined_directory.join("level.dat");
 
             if level_dat_source.exists() {
+                info!("copying `level.dat` from {}", &name);
                 fs::copy(level_dat_source, level_dat_dest)?;
             }
         }
 
-        for dir in SYNC_DIRS {
+        for raw_dir in SYNC_DIRS {
             // Resolve and create destination directory
-            let out_dir = args.combined_directory.join(&dir);
+            let out_dir = args.combined_directory.join(&raw_dir);
             fs::create_dir_all(&out_dir)?;
 
             // Absolute directory path
-            let dir = world_dir.join(&dir);
+            let dir = world_dir.join(&raw_dir);
 
             if !dir.exists() {
                 warn!("directory {:?} does not exist, skipping sync", dir);
                 continue;
             }
 
+            info!("{}: copying region files from \"{}\"", &name, &raw_dir);
             for entry in fs::read_dir(&dir)? {
                 let entry = entry?;
                 let (path, filename) = match entry_is_region_file(entry)? {
@@ -114,13 +118,15 @@ pub fn optimize(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()
     );
 
     for (idx, _, directory, _) in server_iter {
+        let name = directory.to_str().unwrap();
+
         // Region owners are 0-indexed
         let idx = idx - 1;
         let world_dir = directory.join(&global_args.level_name);
 
-        for dir in SYNC_DIRS {
+        for raw_dir in SYNC_DIRS {
             // Resolve and check combined dir
-            let master_dir = args.combined_directory.join(&dir);
+            let master_dir = args.combined_directory.join(&raw_dir);
             if !master_dir.exists() {
                 warn!(
                     "directory {:?} does not exist, skipping optimization",
@@ -131,7 +137,7 @@ pub fn optimize(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()
             }
 
             // Server-local world directory
-            let world_dir = world_dir.join(&dir);
+            let world_dir = world_dir.join(&raw_dir);
             if !world_dir.exists() {
                 warn!(
                     "directory {:?} does not exist, skipping optimization",
@@ -142,6 +148,11 @@ pub fn optimize(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()
             }
 
             let mut regions_to_copy = HashSet::new();
+
+            info!(
+                "{}: cleaning unused region files from \"{}\"",
+                &name, &raw_dir
+            );
 
             for entry in fs::read_dir(&world_dir)? {
                 let entry = entry?;
@@ -190,6 +201,11 @@ pub fn optimize(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()
                     fs::remove_file(&path)?;
                 }
             }
+
+            info!(
+                "{}: copying adjacent region files to \"{}\"",
+                &name, &raw_dir
+            );
 
             for region in regions_to_copy {
                 let filename = region.region_filename();
