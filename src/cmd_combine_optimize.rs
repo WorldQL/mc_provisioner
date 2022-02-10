@@ -73,7 +73,7 @@ pub fn combine(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()>
                     }
                 };
 
-                let block_coords = min_block_from_region(region_coords);
+                let block_coords = region_coords.min_block_from_region();
                 let owner = get_owner_of_location(&args, global_args.server_count, block_coords);
 
                 // Negative owned regions are outside of the world area
@@ -155,7 +155,7 @@ pub fn optimize(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()
                     }
                 };
 
-                let block_coords = min_block_from_region(region_coords);
+                let block_coords = region_coords.min_block_from_region();
                 let owner = get_owner_of_location(&args, global_args.server_count, block_coords);
 
                 // Cast server index to i16 to allow less than zero comparisons
@@ -314,40 +314,42 @@ fn get_owner_of_location(args: &CheckedArgs, server_count: u8, coords: Coords) -
 // endregion
 
 // region: Region Functions
-fn min_block_from_chunk(coords: Coords) -> Coords {
-    Coords {
-        x: coords.x << 4,
-        z: coords.z << 4,
+impl Coords {
+    pub fn min_block_from_chunk(&self) -> Self {
+        Self {
+            x: self.x << 4,
+            z: self.z << 4,
+        }
     }
-}
 
-fn max_block_from_chunk(coords: Coords) -> Coords {
-    Coords {
-        x: ((coords.x + 1) << 4) - 1,
-        z: ((coords.z + 1) << 4) - 1,
+    pub fn max_block_from_chunk(&self) -> Self {
+        Self {
+            x: ((self.x + 1) << 4) - 1,
+            z: ((self.z + 1) << 4) - 1,
+        }
     }
-}
 
-fn min_chunk_from_region(coords: Coords) -> Coords {
-    Coords {
-        x: coords.x << 5,
-        z: coords.z << 5,
+    pub fn min_chunk_from_region(&self) -> Self {
+        Self {
+            x: self.x << 5,
+            z: self.z << 5,
+        }
     }
-}
 
-fn max_chunk_from_region(coords: Coords) -> Coords {
-    Coords {
-        x: ((coords.x + 1) << 5) - 1,
-        z: ((coords.z + 1) << 5) - 1,
+    pub fn max_chunk_from_region(&self) -> Self {
+        Self {
+            x: ((self.x + 1) << 5) - 1,
+            z: ((self.z + 1) << 5) - 1,
+        }
     }
-}
 
-fn min_block_from_region(coords: Coords) -> Coords {
-    min_block_from_chunk(min_chunk_from_region(coords))
-}
+    pub fn min_block_from_region(&self) -> Self {
+        self.min_chunk_from_region().min_block_from_chunk()
+    }
 
-fn max_block_from_region(coords: Coords) -> Coords {
-    max_block_from_chunk(max_chunk_from_region(coords))
+    pub fn max_block_from_region(&self) -> Self {
+        self.max_chunk_from_region().max_block_from_chunk()
+    }
 }
 
 #[rustfmt::skip]
