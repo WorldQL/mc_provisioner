@@ -41,7 +41,7 @@ use color_eyre::Result;
 use tracing::{error, warn};
 
 mod arg_types;
-mod cmd_combine_prune;
+mod cmd_combine_optimize;
 mod cmd_init;
 mod cmd_remove;
 mod cmd_reset_world;
@@ -199,7 +199,7 @@ enum Command {
     },
 
     #[clap(about = "Remove irrelevant world files from each server")]
-    Prune {
+    Optimize {
         #[clap(short = 'd', long)]
         world_diameter: Option<u32>,
 
@@ -330,10 +330,10 @@ fn main() -> Result<()> {
                 combined_directory,
             );
 
-            cmd_combine_prune::combine(global_args, world_management_args)?
+            cmd_combine_optimize::combine(global_args, world_management_args)?
         }
 
-        Command::Prune {
+        Command::Optimize {
             world_diameter,
             slice_width,
             avoid_slicing_origin,
@@ -349,7 +349,7 @@ fn main() -> Result<()> {
                 combined_directory,
             );
 
-            cmd_combine_prune::prune(global_args, world_management_args)?
+            cmd_combine_optimize::optimize(global_args, world_management_args)?
         }
 
         Command::Completions { shell } => {

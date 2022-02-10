@@ -106,7 +106,7 @@ pub fn combine(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()>
     Ok(())
 }
 
-pub fn prune(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()> {
+pub fn optimize(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()> {
     let args = check_args(args);
     dbg!(&args);
 

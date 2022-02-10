@@ -32,7 +32,7 @@ It is designed to automate the following:
 | Stop | `./provisioner stop` | Stop each background server process. |
 | Restart | `./provisioner restart` | Restart all servers. |
 | Combine | `./provisioner combine` | Merge all world region files into a single folder. |
-| Prune | `./provisioner prune` | Remove irrelevant world files from each server. |
+| Optimize | `./provisioner optimize` | Remove irrelevant world files from each server. |
 | Completions | `./provisioner completions` | Generate shell completions. |
 
 You can also run `./provisioner help <command>` to list each commands' available flags.
