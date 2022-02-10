@@ -1,4 +1,4 @@
-use std::fs;
+use std::fs::{self, DirEntry};
 use std::path::PathBuf;
 
 use color_eyre::Result;
@@ -59,21 +59,11 @@ pub fn combine(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()>
 
             for entry in fs::read_dir(&dir)? {
                 let entry = entry?;
-                if !entry.file_type()?.is_file() {
-                    continue;
-                }
-
-                let path = entry.path();
-                match path.extension() {
+                let (path, filename) = match entry_is_region_file(entry)? {
+                    Some(value) => value,
                     None => continue,
-                    Some(extension) => {
-                        if extension != "mca" {
-                            continue;
-                        }
-                    }
-                }
+                };
 
-                let filename = path.file_name().unwrap().to_string_lossy();
                 let region_coords = match parse_coords(&filename) {
                     Some(coords) => coords,
 
@@ -97,7 +87,7 @@ pub fn combine(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()>
                     continue;
                 }
 
-                let destination = out_dir.join(&*filename);
+                let destination = out_dir.join(&filename);
                 fs::copy(&path, &destination)?;
             }
         }
@@ -111,6 +101,27 @@ pub fn optimize(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()
     dbg!(&args);
 
     todo!()
+}
+
+fn entry_is_region_file(entry: DirEntry) -> Result<Option<(PathBuf, String)>> {
+    if !entry.file_type()?.is_file() {
+        return Ok(None);
+    }
+
+    let path = entry.path();
+    match path.extension() {
+        None => return Ok(None),
+        Some(extension) => {
+            if extension != "mca" {
+                return Ok(None);
+            }
+        }
+    }
+
+    let filename = path.file_name().unwrap().to_string_lossy();
+    let filename: String = filename.into();
+
+    Ok(Some((path, filename)))
 }
 // endregion
 
