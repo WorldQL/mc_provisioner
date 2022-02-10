@@ -1,4 +1,6 @@
+use std::collections::HashSet;
 use std::fs::{self, DirEntry};
+use std::ops::Add;
 use std::path::PathBuf;
 
 use color_eyre::Result;
@@ -139,6 +141,8 @@ pub fn optimize(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()
                 continue;
             }
 
+            let mut regions_to_copy = HashSet::new();
+
             for entry in fs::read_dir(&world_dir)? {
                 let entry = entry?;
                 let (path, filename) = match entry_is_region_file(entry)? {
@@ -163,10 +167,38 @@ pub fn optimize(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()
                 let idx = i16::from(idx);
                 if owner == idx {
                     // Track adjacent regions
-                    todo!()
+                    for x in -1..=1i64 {
+                        for z in -1..=1i64 {
+                            let adjacent_region_coords = region_coords + (x, z);
+                            let adjacent_block_coords =
+                                adjacent_region_coords.min_block_from_region();
+
+                            let adjacent_owner = get_owner_of_location(
+                                &args,
+                                global_args.server_count,
+                                adjacent_block_coords,
+                            );
+
+                            // If adjacent region is not owned by this server, should be copied
+                            if adjacent_owner != owner {
+                                regions_to_copy.insert(adjacent_region_coords);
+                            }
+                        }
+                    }
                 } else {
                     // Remove file
                     fs::remove_file(&path)?;
+                }
+            }
+
+            for region in regions_to_copy {
+                let filename = region.region_filename();
+                let filepath = master_dir.join(&filename);
+
+                // Copy from master directory if the file exists
+                if filepath.exists() {
+                    let dest_path = world_dir.join(&filename);
+                    fs::copy(&filepath, &dest_path)?;
                 }
             }
         }
@@ -274,11 +306,24 @@ fn check_args(args: WorldManagementArgs) -> CheckedArgs {
 }
 // endregion
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+// region Coords
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 struct Coords {
     pub x: i64,
     pub z: i64,
 }
+
+impl Add<(i64, i64)> for Coords {
+    type Output = Self;
+
+    fn add(self, (other_x, other_z): (i64, i64)) -> Self::Output {
+        Self {
+            x: self.x + other_x,
+            z: self.z + other_z,
+        }
+    }
+}
+// endregion
 
 // region: Slice Functions
 fn in_unsliced_origin(args: &CheckedArgs, coords: Coords) -> bool {
