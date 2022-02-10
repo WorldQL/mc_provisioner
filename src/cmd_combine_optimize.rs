@@ -98,9 +98,81 @@ pub fn combine(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()>
 
 pub fn optimize(global_args: GlobalArgs, args: WorldManagementArgs) -> Result<()> {
     let args = check_args(args);
-    dbg!(&args);
 
-    todo!()
+    // Ensure combined directory exists
+    if !args.combined_directory.exists() {
+        error!("You must run `provisioner combine` first");
+        std::process::exit(1);
+    }
+
+    let server_iter = utils::server_iter(
+        global_args.server_count,
+        global_args.start_port,
+        &global_args.directory_template,
+    );
+
+    for (idx, _, directory, _) in server_iter {
+        // Region owners are 0-indexed
+        let idx = idx - 1;
+        let world_dir = directory.join(&global_args.level_name);
+
+        for dir in SYNC_DIRS {
+            // Resolve and check combined dir
+            let master_dir = args.combined_directory.join(&dir);
+            if !master_dir.exists() {
+                warn!(
+                    "directory {:?} does not exist, skipping optimization",
+                    master_dir
+                );
+
+                continue;
+            }
+
+            // Server-local world directory
+            let world_dir = world_dir.join(&dir);
+            if !world_dir.exists() {
+                warn!(
+                    "directory {:?} does not exist, skipping optimization",
+                    world_dir
+                );
+
+                continue;
+            }
+
+            for entry in fs::read_dir(&world_dir)? {
+                let entry = entry?;
+                let (path, filename) = match entry_is_region_file(entry)? {
+                    Some(value) => value,
+                    None => continue,
+                };
+
+                let region_coords = match parse_coords(&filename) {
+                    Some(coords) => coords,
+
+                    None => {
+                        tracing::warn!("invalid region file name: {:?}", path);
+                        continue;
+                    }
+                };
+
+                let block_coords = min_block_from_region(region_coords);
+                let owner = get_owner_of_location(&args, global_args.server_count, block_coords);
+
+                // Cast server index to i16 to allow less than zero comparisons
+                // Lets us remove regions outside the world bounds
+                let idx = i16::from(idx);
+                if owner == idx {
+                    // Track adjacent regions
+                    todo!()
+                } else {
+                    // Remove file
+                    fs::remove_file(&path)?;
+                }
+            }
+        }
+    }
+
+    Ok(())
 }
 
 fn entry_is_region_file(entry: DirEntry) -> Result<Option<(PathBuf, String)>> {
